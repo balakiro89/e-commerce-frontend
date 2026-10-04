@@ -52,7 +52,7 @@ export function DashboardHero() {
           >
             <img
               src={DASHBOARD_BANNER_URL}
-              alt="Epic Vault — curated art and supplies for creators"
+              alt={`${COMPANY_NAME} — curated art and supplies for creators`}
               className="h-full w-full object-cover object-[center_55%] sm:object-right transition-transform duration-500 hover:scale-[1.02]"
             />
             <div

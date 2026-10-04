@@ -1,4 +1,6 @@
-export const APP_NAME = 'Epic Vault'
+import { COMPANY_NAME } from '@/data/brand'
+
+export const APP_NAME = COMPANY_NAME
 
 const staticTitles: Record<string, string> = {
   '/login': 'Login',

@@ -1,10 +1,10 @@
-export const COMPANY_NAME = 'Epic Vault'
-export const COMPANY_WEBSITE = 'epicvalut.com'
-export const COMPANY_TAGLINE = 'Art supplies for timeless creations'
-export const COMPANY_LOGO_URL = '/banners/Media.jfif'
+export const COMPANY_NAME = 'BK Enterprises'
+export const COMPANY_WEBSITE = 'bkenterprises.com'
+export const COMPANY_TAGLINE = 'Tanjore paintings | painting supplies'
+export const COMPANY_LOGO_URL = '/bk-logo.jfif'
 
 export const SOCIAL_LINKS = {
-  email: 'mailto:contact@epicvalut.com',
+  email: 'mailto:contact@bkenterprises.com',
   instagram: 'https://instagram.com',
   facebook: 'https://facebook.com',
 } as const

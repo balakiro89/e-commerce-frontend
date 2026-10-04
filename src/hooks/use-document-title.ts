@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { COMPANY_LOGO_URL } from '@/data/brand'
 import { formatDocumentTitle } from '@/lib/page-titles'
 
-const FAVICON_ID = 'epic-vault-favicon'
+const FAVICON_ID = 'bk-enterprises-favicon'
 
 function ensureFavicon() {
   let link = document.querySelector<HTMLLinkElement>(`link#${FAVICON_ID}`)

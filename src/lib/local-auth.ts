@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/auth.store'
 
 export const LOCAL_AUTH_TOKEN = 'local-session'
 
-const SELLER_USERNAMES = new Set(['seller', 'seller@epicvalut.com'])
+const SELLER_USERNAMES = new Set(['seller', 'seller@bkenterprises.com'])
 
 export function isLocalSellerCredentials(username: string): boolean {
   const key = username.trim().toLowerCase()
@@ -39,7 +39,7 @@ export function createLocalSellerUser(username: string): User {
   return {
     id: 'local-seller',
     username: trimmed,
-    email: slug.includes('@') ? slug : `${slug}@epicvalut.com`,
+    email: slug.includes('@') ? slug : `${slug}@bkenterprises.com`,
     mobile: '9111111111',
     role: 'SELLER',
     user_type: 'seller',

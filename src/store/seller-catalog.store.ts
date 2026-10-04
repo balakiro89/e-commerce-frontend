@@ -82,7 +82,7 @@ export const useSellerCatalogStore = create<SellerCatalogState>()(
         })),
     }),
     {
-      name: 'epic-vault-seller-catalog',
+      name: 'bkenterprises-seller-catalog',
       partialize: (state) => ({
         products: state.products,
         orders: state.orders,

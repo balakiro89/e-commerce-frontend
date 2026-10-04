@@ -22,7 +22,7 @@ export function BrandLogo({
       <img
         src={COMPANY_LOGO_URL}
         alt={`${COMPANY_NAME} logo`}
-        className={cn('h-10 w-10 shrink-0 rounded-full object-cover', imageClassName)}
+        className={cn('h-10 w-10 shrink-0 rounded-md object-contain', imageClassName)}
       />
       {showName ? (
         <span

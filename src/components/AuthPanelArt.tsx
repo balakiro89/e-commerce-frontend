@@ -47,7 +47,7 @@ export function AuthPanelArt({
             src={COMPANY_LOGO_URL}
             alt={`${COMPANY_NAME} logo`}
             className={cn(
-              'rounded-full object-cover shadow-lg',
+              'rounded-md object-contain shadow-lg',
               compact ? 'h-14 w-14' : 'h-[5.5rem] w-[5.5rem] sm:h-24 sm:w-24',
             )}
           />
