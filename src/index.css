@@ -1,0 +1,213 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.97 0.004 145);
+  --foreground: oklch(0.22 0.02 145);
+  --card: oklch(0.99 0.002 145);
+  --card-foreground: oklch(0.22 0.02 145);
+  --popover: oklch(0.99 0.002 145);
+  --popover-foreground: oklch(0.22 0.02 145);
+  --primary: oklch(0.36 0.08 155);
+  --primary-foreground: oklch(0.98 0.01 145);
+  --secondary: oklch(0.92 0.006 145);
+  --secondary-foreground: oklch(0.28 0.03 155);
+  --muted: oklch(0.94 0.006 145);
+  --muted-foreground: oklch(0.48 0.02 145);
+  --accent: oklch(0.9 0.02 155);
+  --accent-foreground: oklch(0.32 0.06 155);
+  --destructive: oklch(0.55 0.2 25);
+  --border: oklch(0.88 0.008 145);
+  --input: oklch(0.88 0.008 145);
+  --ring: oklch(0.42 0.09 155);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply min-h-svh bg-background font-sans text-foreground antialiased;
+  }
+
+  a {
+    @apply text-primary underline-offset-4 hover:text-primary/90;
+  }
+}
+
+@keyframes banner-drift {
+  0%,
+  100% {
+    transform: scale(1.05) translateX(0);
+  }
+  50% {
+    transform: scale(1.08) translateX(-1.5%);
+  }
+}
+
+@keyframes banner-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes banner-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-12px);
+    opacity: 0.85;
+  }
+}
+
+@keyframes banner-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-banner-drift {
+  animation: banner-drift 20s ease-in-out infinite;
+}
+
+.animate-banner-drift-slow {
+  animation: banner-drift 26s ease-in-out infinite;
+}
+
+.animate-banner-shimmer {
+  animation: banner-shimmer 8s linear infinite;
+}
+
+.animate-banner-float {
+  animation: banner-float 7s ease-in-out infinite;
+}
+
+.animate-banner-float-delayed {
+  animation: banner-float 9s ease-in-out 1s infinite;
+}
+
+.animate-banner-fade-up {
+  animation: banner-fade-up 0.7s ease-out both;
+}
+
+@keyframes auth-panel-slide {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes auth-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-field-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-auth-panel-slide {
+  animation: auth-panel-slide 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-auth-card-enter {
+  animation: auth-card-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.animate-auth-field-enter {
+  animation: auth-field-enter 0.55s ease-out both;
+}
+
+.auth-stagger-1 {
+  animation-delay: 0.2s;
+}
+
+.auth-stagger-2 {
+  animation-delay: 0.32s;
+}
+
+.auth-stagger-3 {
+  animation-delay: 0.44s;
+}
+
+.auth-stagger-4 {
+  animation-delay: 0.56s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-auth-panel-slide,
+  .animate-auth-card-enter,
+  .animate-auth-field-enter,
+  .animate-dashboard-slide-enter {
+    animation: none;
+  }
+}
+
+@keyframes dashboard-slide-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dashboard-slide-enter {
+  animation: dashboard-slide-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
