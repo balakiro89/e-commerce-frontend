@@ -6,7 +6,21 @@ import type {
   SellerProductInput,
 } from '@/types/seller'
 
+export type SellerMediaUploadResult = {
+  url: string
+  r2_key: string
+  file_name: string
+}
+
 export const sellerApi = {
+  uploadMedia: async (file: File, kind: 'IMAGE' | 'VIDEO' = 'IMAGE'): Promise<SellerMediaUploadResult> => {
+    const form = new FormData()
+    form.append('file', file)
+    form.append('kind', kind)
+    const response = await api.post<SellerMediaUploadResult>('/seller/uploads', form)
+    return response.data
+  },
+
   getDashboardStats: async (): Promise<SellerDashboardStats> => {
     const response = await api.get<SellerDashboardStats>('/seller/dashboard/stats')
     return response.data
