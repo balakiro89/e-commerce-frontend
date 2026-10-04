@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { useAuthStore } from '@/store/auth.store'
+import { signOut } from '@/lib/auth-session'
 import { cn } from '@/lib/utils'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -23,8 +23,6 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function SellerHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
-  const logout = useAuthStore((s) => s.logout)
-
   const navItems = [
     { to: '/seller/dashboard', label: 'Dashboard' },
     { to: '/seller/orders', label: 'Orders' },
@@ -32,8 +30,7 @@ export function SellerHeader() {
   ]
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    void signOut().then(() => navigate('/login'))
   }
 
   return (

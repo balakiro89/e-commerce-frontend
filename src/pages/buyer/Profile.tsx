@@ -10,11 +10,11 @@ import { PageBackLink } from '@/components/PageBackLink'
 import { LoadingState } from '@/components/LoadingState'
 import { profileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { useAuthStore } from '@/store/auth.store'
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user)
-  const localSession = useAuthStore((s) => s.localSession)
   const setUser = useAuthStore((s) => s.setUser)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,16 +30,6 @@ export default function Profile() {
   })
 
   useEffect(() => {
-    if (localSession && user) {
-      reset({
-        username: user.username,
-        email: user.email,
-        password: '',
-        confirmPassword: '',
-      })
-      setLoading(false)
-      return
-    }
     const guard = createEffectGuard()
     authApi
       .getProfile()
@@ -48,8 +38,7 @@ export default function Profile() {
         reset({
           username: profile.username,
           email: profile.email,
-          password: '',
-          confirmPassword: '',
+          mobile: profile.mobile,
         })
         setUser(profile)
       })
@@ -60,43 +49,26 @@ export default function Profile() {
         if (guard.isActive()) setLoading(false)
       })
     return () => guard.cancel()
-  }, [localSession, reset, setUser, user])
+  }, [reset, setUser])
 
   const onSubmit = async (values: ProfileFormValues) => {
     setError(null)
     setSuccess(null)
     try {
-      if (localSession && user) {
-        setUser({
-          ...user,
-          username: values.username,
-          email: values.email,
-        })
-        reset({
-          username: values.username,
-          email: values.email,
-          password: '',
-          confirmPassword: '',
-        })
-        setSuccess('Profile updated successfully.')
-        return
-      }
-      const payload: Partial<ProfileFormValues> = {
+      const updated = await authApi.updateProfile({
         username: values.username,
         email: values.email,
-      }
-      if (values.password) payload.password = values.password
-      const updated = await authApi.updateProfile(payload)
+        mobile: values.mobile,
+      })
       setUser(updated)
       reset({
         username: updated.username,
         email: updated.email,
-        password: '',
-        confirmPassword: '',
+        mobile: updated.mobile,
       })
       setSuccess('Profile updated successfully.')
-    } catch {
-      setError('Could not update profile. Please try again.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not update profile. Please try again.'))
     }
   }
 
@@ -135,22 +107,10 @@ export default function Profile() {
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">New password (optional)</Label>
-          <Input id="password" type="password" autoComplete="new-password" {...register('password')} />
-          {errors.password ? (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm new password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            {...register('confirmPassword')}
-          />
-          {errors.confirmPassword ? (
-            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+          <Label htmlFor="mobile">Mobile</Label>
+          <Input id="mobile" {...register('mobile')} />
+          {errors.mobile ? (
+            <p className="text-sm text-destructive">{errors.mobile.message}</p>
           ) : null}
         </div>
         <LoadingButton type="submit" loading={isSubmitting} loadingText="Saving…">

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { cartApi } from '@/api/cart.api'
 import { orderApi } from '@/api/order.api'
 import { paymentApi } from '@/api/payment.api'
 import { PageBackLink } from '@/components/PageBackLink'
@@ -12,18 +13,29 @@ import { Label } from '@/components/ui/label'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { EmptyState } from '@/components/EmptyState'
 import { checkoutSchema, type CheckoutFormValues } from '@/schemas/checkout.schema'
+import { getApiErrorMessage } from '@/lib/api-error'
+import { openRazorpayCheckout } from '@/lib/razorpay'
 import { formatPrice } from '@/lib/utils'
+import type { PaymentInitResponse } from '@/types/order'
 import { useCartStore } from '@/store/cart.store'
+
+async function resolvePaymentInit(
+  orderId: string,
+  initial: PaymentInitResponse,
+): Promise<PaymentInitResponse> {
+  if (initial.razorpay_order_id && initial.razorpay_key_id) return initial
+  return paymentApi.initiate(orderId)
+}
 
 export default function Checkout() {
   const navigate = useNavigate()
   const items = useCartStore((s) => s.items)
   const clearCart = useCartStore((s) => s.clearCart)
   const [error, setError] = useState<string | null>(null)
-  const displaySubtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  )
+  const [validatedTotal, setValidatedTotal] = useState<number | null>(null)
+  const displaySubtotal =
+    validatedTotal ??
+    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
   const {
     register,
@@ -49,7 +61,19 @@ export default function Checkout() {
   const onSubmit = async (values: CheckoutFormValues) => {
     setError(null)
     try {
-      const { order, payment } = await orderApi.createOrder({
+      const cartItems = items.map((item) => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+      }))
+
+      const validation = await cartApi.validate(cartItems)
+      if (!validation.valid) {
+        setError('Some items are out of stock or unavailable. Update your cart and try again.')
+        return
+      }
+      setValidatedTotal(validation.total)
+
+      const { order, payment: initialPayment } = await orderApi.createOrder({
         customer_name: values.customer_name,
         customer_email: values.customer_email,
         customer_phone: values.customer_phone,
@@ -60,27 +84,41 @@ export default function Checkout() {
           pincode: values.pincode,
           country: values.country,
         },
-        items: items.map((item) => ({
-          product_id: item.product.id,
-          quantity: item.quantity,
-        })),
+        items: cartItems,
       })
 
-      const paymentResult =
-        payment.redirect_url
-          ? payment
-          : await paymentApi.initiate(order.id)
+      const payment = await resolvePaymentInit(order.id, initialPayment)
 
-      clearCart()
-
-      if (paymentResult.redirect_url) {
-        window.location.href = paymentResult.redirect_url
+      if (payment.redirect_url) {
+        clearCart()
+        window.location.href = payment.redirect_url
         return
       }
 
+      if (payment.razorpay_order_id && payment.razorpay_key_id) {
+        const razorpayResult = await openRazorpayCheckout({
+          keyId: payment.razorpay_key_id,
+          razorpayOrderId: payment.razorpay_order_id,
+          amountInr: payment.amount,
+          currency: payment.currency,
+          customerName: values.customer_name,
+          customerEmail: values.customer_email,
+          customerPhone: values.customer_phone,
+          description: `Order ${order.order_number}`,
+        })
+
+        await paymentApi.verify({
+          order_id: order.id,
+          razorpay_order_id: razorpayResult.razorpay_order_id,
+          razorpay_payment_id: razorpayResult.razorpay_payment_id,
+          razorpay_signature: razorpayResult.razorpay_signature,
+        })
+      }
+
+      clearCart()
       navigate(`/orders/${order.id}`)
-    } catch {
-      setError('Could not place order. Please try again.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not place order. Please try again.'))
     }
   }
 

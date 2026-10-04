@@ -124,9 +124,7 @@ export default function SellerProductForm() {
       const image_urls =
         newPhotoUrls.length > 0
           ? [...newPhotoUrls, ...existingImages].slice(0, MAX_PRODUCT_PHOTOS)
-          : existingImages.length
-            ? existingImages
-            : ['/banners/category-watercolor-art.jpg']
+          : existingImages
 
       let video_url = existingVideo
       if (videoFile) {

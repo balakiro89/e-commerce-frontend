@@ -6,8 +6,7 @@ interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  localSession: boolean
-  login: (user: User, token: string, options?: { local?: boolean }) => void
+  login: (user: User, token: string) => void
   logout: () => void
   setUser: (user: User) => void
 }
@@ -18,20 +17,17 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      localSession: false,
-      login: (user, token, options) =>
+      login: (user, token) =>
         set({
           user,
           token,
           isAuthenticated: true,
-          localSession: options?.local ?? false,
         }),
       logout: () =>
         set({
           user: null,
           token: null,
           isAuthenticated: false,
-          localSession: false,
         }),
       setUser: (user) => set({ user }),
     }),
@@ -41,7 +37,6 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
-        localSession: state.localSession,
       }),
     },
   ),

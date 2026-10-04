@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { signOut } from '@/lib/auth-session'
 import { useAuthStore } from '@/store/auth.store'
 import { cn } from '@/lib/utils'
 
@@ -26,7 +27,6 @@ function userInitials(username: string): string {
 export function UserAccountMenu() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const logout = useAuthStore((s) => s.logout)
   const [open, setOpen] = useState(false)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -53,8 +53,7 @@ export function UserAccountMenu() {
 
   const handleLogout = () => {
     setOpen(false)
-    logout()
-    navigate('/login')
+    void signOut().then(() => navigate('/login'))
   }
 
   return (

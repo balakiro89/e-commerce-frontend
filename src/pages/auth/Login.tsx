@@ -8,12 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { ErrorMessage } from '@/components/ErrorMessage'
-import {
-  createLocalSellerUser,
-  createLocalUser,
-  isLocalSellerCredentials,
-  LOCAL_AUTH_TOKEN,
-} from '@/lib/local-auth'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { homePathForUser, normalizeUser } from '@/lib/user-type'
 import { loginSchema, type LoginFormValues } from '@/schemas/auth.schema'
 import { useAuthStore } from '@/store/auth.store'
@@ -34,42 +29,18 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   })
 
-  const completeLogin = (user: ReturnType<typeof normalizeUser>, token: string, local?: boolean) => {
-    const normalized = normalizeUser(user)
-    login(normalized, token, { local })
-    navigate(homePathForUser(normalized), { replace: true })
-  }
-
   const onSubmit = async (values: LoginFormValues) => {
     setError(null)
-    const useLocalFirst = !import.meta.env.VITE_API_URL
-
-    if (useLocalFirst) {
-      await Promise.resolve()
-      const user = isLocalSellerCredentials(values.username)
-        ? createLocalSellerUser(values.username)
-        : createLocalUser(values.username)
-      completeLogin(user, LOCAL_AUTH_TOKEN, true)
-      return
-    }
-
     try {
       const data = await authApi.login({
-        email_or_mobile: values.username,
+        email_or_mobile: values.email_or_mobile,
         password: values.password,
       })
-      const user = normalizeUser({
-        ...data.user,
-        user_type:
-          (data.user as { user_type?: string }).user_type === 'seller' ? 'seller' : 'buyer',
-      })
-      completeLogin(user, data.access_token)
-    } catch {
-      await Promise.resolve()
-      const user = isLocalSellerCredentials(values.username)
-        ? createLocalSellerUser(values.username)
-        : createLocalUser(values.username)
-      completeLogin(user, LOCAL_AUTH_TOKEN, true)
+      const user = normalizeUser(data.user)
+      login(user, data.access_token)
+      navigate(homePathForUser(user), { replace: true })
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Invalid email/mobile or password.'))
     }
   }
 
@@ -78,33 +49,30 @@ export default function Login() {
       <div className="animate-auth-field-enter space-y-2 text-center lg:text-left">
         <h1 className="font-serif text-[2rem] font-semibold leading-tight text-primary">Sign in</h1>
         <p className="text-sm text-muted-foreground">Welcome back to {COMPANY_NAME}</p>
-        <p className="text-xs text-muted-foreground">
-          Seller demo: sign in with username <span className="font-medium text-foreground">seller</span>
-        </p>
       </div>
 
       {error ? <ErrorMessage message={error} /> : null}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <div className="animate-auth-field-enter auth-stagger-1 space-y-2">
-          <Label htmlFor="username" className="font-semibold text-foreground">
-            Username
+          <Label htmlFor="email_or_mobile" className="font-semibold text-foreground">
+            Email or mobile
           </Label>
           <div className="relative">
             <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200" />
             <Input
-              id="username"
+              id="email_or_mobile"
               autoComplete="username"
-              placeholder="Enter your username"
+              placeholder="you@example.com or 9876543210"
               className={cn(
                 'h-11 rounded-lg border-border/80 bg-muted/30 pl-10 transition-all duration-200 focus:bg-background focus:shadow-sm',
-                errors.username && 'border-destructive',
+                errors.email_or_mobile && 'border-destructive',
               )}
-              {...register('username')}
+              {...register('email_or_mobile')}
             />
           </div>
-          {errors.username ? (
-            <p className="text-sm text-destructive">{errors.username.message}</p>
+          {errors.email_or_mobile ? (
+            <p className="text-sm text-destructive">{errors.email_or_mobile.message}</p>
           ) : null}
         </div>
 

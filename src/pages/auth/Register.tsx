@@ -9,6 +9,7 @@ import { COMPANY_NAME } from '@/data/brand'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ErrorMessage } from '@/components/ErrorMessage'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { registerSchema, type RegisterFormValues } from '@/schemas/auth.schema'
 import { homePathForUser, normalizeUser } from '@/lib/user-type'
 import { useAuthStore } from '@/store/auth.store'
@@ -42,8 +43,8 @@ export default function Register() {
       const user = normalizeUser(data.user)
       login(user, data.access_token)
       navigate(homePathForUser(user), { replace: true })
-    } catch {
-      setError('Could not create account. Please check your details and try again.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not create account. Please check your details and try again.'))
     }
   }
 

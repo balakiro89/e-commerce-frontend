@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, ShoppingCart } from 'lucide-react'
-import { useShallow } from 'zustand/react/shallow'
 import { BrandLogo } from '@/components/BrandLogo'
 import { UserAccountMenu } from '@/components/UserAccountMenu'
 import { Button } from '@/components/ui/button'
@@ -17,6 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { signOut } from '@/lib/auth-session'
 import { useAuthStore } from '@/store/auth.store'
 import { selectCartItemCount } from '@/store/cart.selectors'
 import { useCartStore } from '@/store/cart.store'
@@ -37,14 +37,11 @@ const NAV_ITEMS = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
-  const { logout, isAuthenticated } = useAuthStore(
-    useShallow((s) => ({ logout: s.logout, isAuthenticated: s.isAuthenticated })),
-  )
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const cartCount = useCartStore(selectCartItemCount)
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
+    void signOut().then(() => navigate('/login'))
   }
 
   return (

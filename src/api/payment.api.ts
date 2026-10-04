@@ -1,9 +1,15 @@
 import api from '@/api/axios'
-import type { PaymentInitResponse } from '@/types/order'
+import { unwrapApiData } from '@/lib/api-response'
+import type { PaymentInitResponse, PaymentVerifyPayload } from '@/types/order'
 
 export const paymentApi = {
-  initiate: (orderId: string) =>
-    api
-      .post<PaymentInitResponse>('/payments/initiate', { order_id: orderId })
-      .then((r) => r.data),
+  initiate: async (orderId: string): Promise<PaymentInitResponse> => {
+    const response = await api.post<unknown>('/payments/initiate', { order_id: orderId })
+    return unwrapApiData<PaymentInitResponse>(response.data)
+  },
+
+  verify: async (payload: PaymentVerifyPayload): Promise<void> => {
+    const response = await api.post<unknown>('/payments/verify', payload)
+    unwrapApiData(response.data)
+  },
 }
