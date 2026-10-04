@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { bannerSlides } from '@/data/banners'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { cn } from '@/lib/utils'
 
 const AUTOPLAY_MS = 6500
@@ -57,10 +58,7 @@ export function BannerCarousel() {
       onBlurCapture={() => setPaused(false)}
     >
       <div className="grid min-h-0 md:min-h-[360px] lg:min-h-[400px] lg:grid-cols-2">
-        <div
-          key={`copy-${slide.id}`}
-          className="animate-dashboard-slide-enter relative order-2 flex flex-col justify-center gap-4 bg-gradient-to-br from-secondary/40 to-background p-6 pb-16 sm:p-8 sm:pb-16 md:p-10 md:pb-10 lg:order-1"
-        >
+        <div className="relative order-2 flex flex-col justify-center gap-4 bg-gradient-to-br from-secondary/40 to-background p-6 pb-16 sm:p-8 sm:pb-16 md:p-10 md:pb-10 lg:order-1">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Art categories
           </p>
@@ -80,15 +78,14 @@ export function BannerCarousel() {
           </div>
         </div>
 
-        <div
-          key={`img-${slide.id}`}
-          className="animate-dashboard-slide-enter relative order-1 min-h-[220px] sm:min-h-[280px] lg:order-2 lg:min-h-full"
-        >
-          <img
+        <div className="relative order-1 min-h-[220px] sm:min-h-[280px] lg:order-2 lg:min-h-full">
+          <OptimizedImage
+            key={slide.id}
             src={slide.imageUrl}
             alt={slide.imageAlt}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading={index === 0 ? 'eager' : 'lazy'}
+            priority={index === 0}
+            className="object-cover"
+            wrapperClassName="absolute inset-0 h-full w-full"
           />
           <div
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/5"

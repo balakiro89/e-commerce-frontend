@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { orderApi } from '@/api/order.api'
 import { LoadingState } from '@/components/LoadingState'
 import { ErrorMessage } from '@/components/ErrorMessage'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { PageBackLink } from '@/components/PageBackLink'
 import { createEffectGuard } from '@/lib/effect-guard'
 import { cn, formatDate, formatPrice } from '@/lib/utils'
@@ -118,10 +119,11 @@ export default function OrderDetails() {
           <ul className="mt-4 space-y-4">
             {order.items.map((item) => (
               <li key={item.product_id} className="flex gap-4 text-sm">
-                <img
+                <OptimizedImage
                   src={item.image_url}
                   alt=""
-                  className="h-16 w-16 rounded object-cover"
+                  wrapperClassName="h-16 w-16 shrink-0 rounded"
+                  className="object-cover"
                 />
                 <div className="flex-1">
                   <p className="font-medium">{item.product_name}</p>

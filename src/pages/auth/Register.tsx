@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Lock, Mail, Phone, User } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Lock, Mail, Phone, User } from 'lucide-react'
 import { authApi } from '@/api/auth.api'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { RequiredLabel } from '@/components/RequiredLabel'
 import { COMPANY_NAME } from '@/data/brand'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { registerSchema, type RegisterFormValues } from '@/schemas/auth.schema'
@@ -22,6 +22,8 @@ export default function Register() {
   const navigate = useNavigate()
   const login = useAuthStore((s) => s.login)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     register,
@@ -59,9 +61,9 @@ export default function Register() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="space-y-2">
-          <Label htmlFor="username" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="username" className="font-semibold text-foreground">
             Username
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -77,9 +79,9 @@ export default function Register() {
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="email" className="font-semibold text-foreground">
             Email
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -96,9 +98,9 @@ export default function Register() {
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="mobile" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="mobile" className="font-semibold text-foreground">
             Mobile number
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -115,38 +117,54 @@ export default function Register() {
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="password" className="font-semibold text-foreground">
             Password
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               placeholder="Create a password"
-              className={cn(inputClass, 'pl-10', errors.password && 'border-destructive')}
+              className={cn(inputClass, 'pl-10 pr-10', errors.password && 'border-destructive')}
               {...register('password')}
             />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
           {errors.password ? (
             <p className="text-sm text-destructive">{errors.password.message}</p>
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="confirmPassword" className="font-semibold text-foreground">
             Confirm password
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               placeholder="Confirm your password"
-              className={cn(inputClass, 'pl-10', errors.confirmPassword && 'border-destructive')}
+              className={cn(inputClass, 'pl-10 pr-10', errors.confirmPassword && 'border-destructive')}
               {...register('confirmPassword')}
             />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
           {errors.confirmPassword ? (
             <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>

@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { formatPrice } from '@/lib/utils'
 import type { CartItem as CartItemType } from '@/types/cart'
 import { useCartStore } from '@/store/cart.store'
@@ -41,10 +42,11 @@ export const CartItem = memo(function CartItem({ item }: CartItemProps) {
 
   return (
     <div className="flex flex-col gap-4 border-b border-border py-4 sm:flex-row sm:items-center">
-      <img
+      <OptimizedImage
         src={item.product.image_url}
         alt={item.product.name}
-        className="h-24 w-24 shrink-0 rounded-md object-cover"
+        wrapperClassName="h-24 w-24 shrink-0 rounded-md"
+        className="object-cover"
       />
       <div className="min-w-0 flex-1">
         <p className="font-medium">{item.product.name}</p>

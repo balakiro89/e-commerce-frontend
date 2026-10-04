@@ -3,6 +3,7 @@ import { createEffectGuard } from '@/lib/effect-guard'
 import { Link } from 'react-router-dom'
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
 import { sellerApi } from '@/api/seller.api'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { PageBackLink } from '@/components/PageBackLink'
 import { LoadingState } from '@/components/LoadingState'
 import { EmptyState } from '@/components/EmptyState'
@@ -97,10 +98,11 @@ export default function SellerProducts() {
                 <tr key={product.id} className="border-b border-border/60 last:border-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <img
+                      <OptimizedImage
                         src={product.image_url}
                         alt=""
-                        className="h-12 w-12 rounded-md object-cover"
+                        wrapperClassName="h-12 w-12 shrink-0 rounded-md"
+                        className="object-cover"
                       />
                       <div>
                         <p className="font-medium">{product.name}</p>

@@ -9,7 +9,7 @@ import { PageBackLink } from '@/components/PageBackLink'
 import { Button } from '@/components/ui/button'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { RequiredLabel } from '@/components/RequiredLabel'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { EmptyState } from '@/components/EmptyState'
 import { checkoutSchema, type CheckoutFormValues } from '@/schemas/checkout.schema'
@@ -136,21 +136,21 @@ export default function Checkout() {
           <h2 className="text-lg font-medium">Customer details</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="customer_name">Name</Label>
+              <RequiredLabel htmlFor="customer_name">Name</RequiredLabel>
               <Input id="customer_name" {...register('customer_name')} />
               {errors.customer_name ? (
                 <p className="text-sm text-destructive">{errors.customer_name.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="customer_email">Email</Label>
+              <RequiredLabel htmlFor="customer_email">Email</RequiredLabel>
               <Input id="customer_email" type="email" {...register('customer_email')} />
               {errors.customer_email ? (
                 <p className="text-sm text-destructive">{errors.customer_email.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="customer_phone">Phone</Label>
+              <RequiredLabel htmlFor="customer_phone">Phone</RequiredLabel>
               <Input id="customer_phone" {...register('customer_phone')} />
               {errors.customer_phone ? (
                 <p className="text-sm text-destructive">{errors.customer_phone.message}</p>
@@ -163,35 +163,35 @@ export default function Checkout() {
           <h2 className="text-lg font-medium">Shipping address</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="address">Address</Label>
+              <RequiredLabel htmlFor="address">Address</RequiredLabel>
               <Input id="address" {...register('address')} />
               {errors.address ? (
                 <p className="text-sm text-destructive">{errors.address.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
+              <RequiredLabel htmlFor="city">City</RequiredLabel>
               <Input id="city" {...register('city')} />
               {errors.city ? (
                 <p className="text-sm text-destructive">{errors.city.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
+              <RequiredLabel htmlFor="state">State</RequiredLabel>
               <Input id="state" {...register('state')} />
               {errors.state ? (
                 <p className="text-sm text-destructive">{errors.state.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pincode">Pincode</Label>
+              <RequiredLabel htmlFor="pincode">Pincode</RequiredLabel>
               <Input id="pincode" {...register('pincode')} />
               {errors.pincode ? (
                 <p className="text-sm text-destructive">{errors.pincode.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
+              <RequiredLabel htmlFor="country">Country</RequiredLabel>
               <Input id="country" {...register('country')} />
               {errors.country ? (
                 <p className="text-sm text-destructive">{errors.country.message}</p>

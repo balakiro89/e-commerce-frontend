@@ -19,7 +19,7 @@ export const sellerProductFormSchema = z.object({
 
 export type SellerProductFormValues = z.infer<typeof sellerProductFormSchema>
 
-export const MAX_PRODUCT_PHOTOS = 4
+export const MAX_PRODUCT_PHOTOS = 3
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024
 export const MAX_VIDEO_BYTES = 50 * 1024 * 1024
 

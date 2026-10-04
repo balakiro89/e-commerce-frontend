@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Eye, EyeOff, Lock, User } from 'lucide-react'
 import { authApi } from '@/api/auth.api'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { RequiredLabel } from '@/components/RequiredLabel'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { getApiErrorMessage } from '@/lib/api-error'
@@ -55,9 +55,9 @@ export default function Login() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <div className="animate-auth-field-enter auth-stagger-1 space-y-2">
-          <Label htmlFor="email_or_mobile" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="email_or_mobile" className="font-semibold text-foreground">
             Email or mobile
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200" />
             <Input
@@ -77,9 +77,9 @@ export default function Login() {
         </div>
 
         <div className="animate-auth-field-enter auth-stagger-2 space-y-2">
-          <Label htmlFor="password" className="font-semibold text-foreground">
+          <RequiredLabel htmlFor="password" className="font-semibold text-foreground">
             Password
-          </Label>
+          </RequiredLabel>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

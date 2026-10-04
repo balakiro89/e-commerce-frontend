@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types/product'
 import { useCartStore } from '@/store/cart.store'
@@ -30,14 +31,13 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   }, [addItem, product, run])
 
   return (
-    <Card className="flex flex-col overflow-hidden pt-0">
+    <Card className="flex flex-col overflow-hidden pt-0 [content-visibility:auto] [contain-intrinsic-size:320px]">
       <Link to={`/products/${product.id}`} className="block aspect-[4/3] overflow-hidden bg-muted">
-        <img
+        <OptimizedImage
           src={product.image_url}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
-          loading="lazy"
-          decoding="async"
+          className="object-cover"
+          wrapperClassName="aspect-[4/3] h-full w-full"
         />
       </Link>
       <CardContent className="flex flex-1 flex-col gap-3 pt-4">

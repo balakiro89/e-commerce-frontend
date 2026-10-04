@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { DASHBOARD_BANNER_URL, COMPANY_NAME } from '@/data/brand'
 
 export function DashboardHero() {
@@ -50,10 +51,12 @@ export function DashboardHero() {
             to="/products"
             className="relative block aspect-[16/10] w-full overflow-hidden sm:aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto lg:min-h-[320px]"
           >
-            <img
+            <OptimizedImage
               src={DASHBOARD_BANNER_URL}
               alt={`${COMPANY_NAME} — curated art and supplies for creators`}
-              className="h-full w-full object-cover object-[center_55%] sm:object-right transition-transform duration-500 hover:scale-[1.02]"
+              priority
+              className="object-cover object-[center_55%] sm:object-right"
+              wrapperClassName="h-full w-full"
             />
             <div
               className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#eef1ec] lg:via-[#eef1ec]/40 lg:to-transparent"

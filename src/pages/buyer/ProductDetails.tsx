@@ -14,6 +14,7 @@ import { PRODUCT_TYPE_LABELS, type Product } from '@/types/product'
 import { useAuthStore } from '@/store/auth.store'
 import { useCartStore } from '@/store/cart.store'
 import { useActionLoading } from '@/hooks/use-action-loading'
+import { OptimizedImage } from '@/components/OptimizedImage'
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>()
@@ -74,12 +75,12 @@ export default function ProductDetails() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-          <img
+          <OptimizedImage
             src={product.image_url}
             alt={product.name}
-            className="aspect-square w-full object-cover"
-            decoding="async"
-            fetchPriority="high"
+            priority
+            className="aspect-square object-cover"
+            wrapperClassName="w-full"
           />
         </div>
         <div className="space-y-6">

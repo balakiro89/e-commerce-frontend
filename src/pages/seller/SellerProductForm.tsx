@@ -11,7 +11,8 @@ import { LoadingState } from '@/components/LoadingState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { RequiredLabel } from '@/components/RequiredLabel'
+import { OptimizedImage } from '@/components/OptimizedImage'
 import { LoadingButton } from '@/components/ui/loading-button'
 import {
   MAX_PRODUCT_PHOTOS,
@@ -136,10 +137,10 @@ export default function SellerProductForm() {
       setSubmitPhase('uploading')
       const image_urls = [...existingImages]
 
-      for (const file of photoFiles) {
-        const uploaded = await sellerApi.uploadMedia(file, 'IMAGE')
-        image_urls.push(uploaded.url)
-      }
+      const uploads = await Promise.all(
+        photoFiles.map((file) => sellerApi.uploadMedia(file, 'IMAGE')),
+      )
+      image_urls.push(...uploads.map((u) => u.url))
 
       const trimmedImages = image_urls.slice(0, MAX_PRODUCT_PHOTOS)
 
@@ -209,13 +210,13 @@ export default function SellerProductForm() {
         <input type="hidden" {...register('product_type')} />
 
         <div className="space-y-2">
-          <Label htmlFor="name">Product name</Label>
+          <RequiredLabel htmlFor="name">Product name</RequiredLabel>
           <Input id="name" {...register('name')} />
           {errors.name ? <p className="text-sm text-destructive">{errors.name.message}</p> : null}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="short_description">Short description</Label>
+          <RequiredLabel htmlFor="short_description">Short description</RequiredLabel>
           <Input id="short_description" {...register('short_description')} />
           {errors.short_description ? (
             <p className="text-sm text-destructive">{errors.short_description.message}</p>
@@ -223,7 +224,7 @@ export default function SellerProductForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Full description</Label>
+          <RequiredLabel htmlFor="description">Full description</RequiredLabel>
           <textarea
             id="description"
             rows={4}
@@ -237,12 +238,12 @@ export default function SellerProductForm() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="price">Price (₹)</Label>
+            <RequiredLabel htmlFor="price">Price (₹)</RequiredLabel>
             <Input id="price" type="number" step="0.01" {...register('price')} />
             {errors.price ? <p className="text-sm text-destructive">{errors.price.message}</p> : null}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="stock">Stock</Label>
+            <RequiredLabel htmlFor="stock">Stock</RequiredLabel>
             <Input id="stock" type="number" {...register('stock')} />
             {errors.stock ? <p className="text-sm text-destructive">{errors.stock.message}</p> : null}
           </div>
@@ -256,14 +257,16 @@ export default function SellerProductForm() {
             checked={isActive}
             onChange={(e) => setValue('is_active', e.target.checked)}
           />
-          <Label htmlFor="is_active">Product is active</Label>
+          <RequiredLabel htmlFor="is_active" optional>
+            Product is active
+          </RequiredLabel>
         </div>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <Label htmlFor="photos">
+            <RequiredLabel htmlFor="photos">
               Photos ({totalPhotos}/{MAX_PRODUCT_PHOTOS})
-            </Label>
+            </RequiredLabel>
             {totalPhotos < MAX_PRODUCT_PHOTOS ? (
               <Button
                 type="button"
@@ -292,10 +295,12 @@ export default function SellerProductForm() {
               <div className="flex flex-wrap gap-3">
                 {photoPreviews.map((url, index) => (
                   <div key={`new-${url}`} className="relative">
-                    <img
+                    <OptimizedImage
                       src={url}
                       alt={`Selected photo ${index + 1}`}
-                      className="h-24 w-24 rounded-lg border border-border object-cover shadow-sm"
+                      wrapperClassName="h-24 w-24 rounded-lg border border-border shadow-sm"
+                      className="object-cover"
+                      priority
                     />
                     <button
                       type="button"
@@ -309,10 +314,11 @@ export default function SellerProductForm() {
                 ))}
                 {existingImages.map((url, index) => (
                   <div key={`existing-${index}-${url.slice(0, 24)}`} className="relative">
-                    <img
+                    <OptimizedImage
                       src={url}
                       alt={`Saved photo ${index + 1}`}
-                      className="h-24 w-24 rounded-lg border border-border object-cover shadow-sm"
+                      wrapperClassName="h-24 w-24 rounded-lg border border-border shadow-sm"
+                      className="object-cover"
                     />
                     {isEdit ? (
                       <button
@@ -336,7 +342,9 @@ export default function SellerProductForm() {
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="video">Video (optional, max 50 MB)</Label>
+          <RequiredLabel htmlFor="video" optional>
+            Video (max 50 MB)
+          </RequiredLabel>
           <Input
             id="video"
             type="file"
