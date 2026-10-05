@@ -1,4 +1,5 @@
 import api from '@/api/axios'
+import { normalizeProductFromApi } from '@/lib/product-images'
 import type { Order, OrderStatus } from '@/types/order'
 import type {
   SellerDashboardStats,
@@ -38,22 +39,22 @@ export const sellerApi = {
 
   getProducts: async (): Promise<SellerProduct[]> => {
     const response = await api.get<SellerProduct[]>('/seller/products')
-    return response.data
+    return response.data.map((p) => normalizeProductFromApi(p) as SellerProduct)
   },
 
   getProductById: async (id: string): Promise<SellerProduct> => {
     const response = await api.get<SellerProduct>(`/seller/products/${id}`)
-    return response.data
+    return normalizeProductFromApi(response.data) as SellerProduct
   },
 
   createProduct: async (input: SellerProductInput): Promise<SellerProduct> => {
     const response = await api.post<SellerProduct>('/seller/products', input)
-    return response.data
+    return normalizeProductFromApi(response.data) as SellerProduct
   },
 
   updateProduct: async (id: string, input: SellerProductInput): Promise<SellerProduct> => {
     const response = await api.put<SellerProduct>(`/seller/products/${id}`, input)
-    return response.data
+    return normalizeProductFromApi(response.data) as SellerProduct
   },
 
   deleteProduct: async (id: string): Promise<void> => {

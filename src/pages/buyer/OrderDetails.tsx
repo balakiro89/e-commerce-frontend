@@ -6,6 +6,7 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import { OptimizedImage } from '@/components/OptimizedImage'
 import { PageBackLink } from '@/components/PageBackLink'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import { cn, formatDate, formatPrice } from '@/lib/utils'
 import type { Order, OrderStatus } from '@/types/order'
 
@@ -68,8 +69,7 @@ export default function OrderDetails() {
     const guard = createEffectGuard()
     setLoading(true)
     setError(null)
-    orderApi
-      .getOrderById(id)
+    fetchOnce(`order-${id}`, () => orderApi.getOrderById(id))
       .then((result) => {
         if (guard.isActive()) setOrder(result)
       })

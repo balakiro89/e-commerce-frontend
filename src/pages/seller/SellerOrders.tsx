@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import { sellerApi } from '@/api/seller.api'
 import { PageBackLink } from '@/components/PageBackLink'
 import { LoadingState } from '@/components/LoadingState'
@@ -32,8 +33,7 @@ export default function SellerOrders() {
   const load = useCallback((isActive: () => boolean = () => true) => {
     setLoading(true)
     setError(null)
-    sellerApi
-      .getOrders()
+    fetchOnce('seller-orders', () => sellerApi.getOrders())
       .then((result) => {
         if (isActive()) setOrders(result)
       })

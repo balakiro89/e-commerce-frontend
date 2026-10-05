@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { PageBackLink } from '@/components/PageBackLink'
 import { asArray } from '@/lib/arrays'
+import { fetchOnce } from '@/lib/fetch-once'
 import type { Order } from '@/types/order'
 
 export default function Orders() {
@@ -17,8 +18,7 @@ export default function Orders() {
   const load = useCallback((isActive: () => boolean = () => true) => {
     setLoading(true)
     setError(null)
-    orderApi
-      .getOrders()
+    fetchOnce('buyer-orders', () => orderApi.getOrders())
       .then((data) => {
         if (isActive()) setOrders(asArray<Order>(data))
       })

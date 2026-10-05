@@ -4,7 +4,10 @@ import type { CartItem } from '@/types/cart'
 import type { Product } from '@/types/product'
 
 export interface CartState {
+  cartOwnerId: string | null
   items: CartItem[]
+  syncOwner: (userId: string | null) => void
+  resetForLogout: () => void
   addItem: (product: Product, quantity?: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
@@ -16,22 +19,28 @@ export interface CartState {
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
+      cartOwnerId: null,
       items: [],
+      syncOwner: (userId) => {
+        const { cartOwnerId } = get()
+        if (cartOwnerId === userId) return
+        if (cartOwnerId === null && userId !== null) {
+          set({ cartOwnerId: userId })
+          return
+        }
+        set({ cartOwnerId: userId, items: [] })
+      },
+      resetForLogout: () => set({ cartOwnerId: null, items: [] }),
       addItem: (product, quantity = 1) => {
         set((state) => {
-          const existing = state.items.find(
-            (item) => item.product.id === product.id,
-          )
+          const existing = state.items.find((item) => item.product.id === product.id)
           if (existing) {
             return {
               items: state.items.map((item) =>
                 item.product.id === product.id
                   ? {
                       ...item,
-                      quantity: Math.min(
-                        item.quantity + quantity,
-                        product.stock,
-                      ),
+                      quantity: Math.min(item.quantity + quantity, product.stock),
                     }
                   : item,
               ),
@@ -66,14 +75,16 @@ export const useCartStore = create<CartState>()(
         }))
       },
       clearCart: () => set({ items: [] }),
-      getItemCount: () =>
-        get().items.reduce((sum, item) => sum + item.quantity, 0),
+      getItemCount: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
       getSubtotal: () =>
-        get().items.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
-          0,
-        ),
+        get().items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
     }),
-    { name: 'art-gallery-cart' },
+    {
+      name: 'art-gallery-cart',
+      partialize: (state) => ({
+        cartOwnerId: state.cartOwnerId,
+        items: state.items,
+      }),
+    },
   ),
 )

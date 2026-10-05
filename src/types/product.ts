@@ -17,7 +17,11 @@ export interface Product {
   description: string
   short_description: string
   price: number
+  /** Primary thumbnail (first gallery image). */
   image_url: string
+  /** All product images in upload/sort order. */
+  image_urls: string[]
+  video_url?: string
   product_type: ProductType
   stock: number
   is_active: boolean

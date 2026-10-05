@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Package, RefreshCw, ShoppingBag, TrendingUp, AlertTriangle } from 'lucide-react'
 import { sellerApi } from '@/api/seller.api'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import { LoadingState } from '@/components/LoadingState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,9 @@ export default function SellerDashboard() {
     else setRefreshing(true)
     setError(null)
     try {
-      const data = await sellerApi.getDashboardStats()
+      const data = silent
+        ? await sellerApi.getDashboardStats()
+        : await fetchOnce('seller-dashboard-stats', () => sellerApi.getDashboardStats())
       if (isActive()) setStats(data)
     } catch {
       if (isActive()) setError('Could not load dashboard stats.')

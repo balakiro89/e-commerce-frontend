@@ -11,6 +11,7 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { COMPANY_NAME } from '@/data/brand'
 import { useAuthStore } from '@/store/auth.store'
+import { fetchOnce } from '@/lib/fetch-once'
 import type { Product } from '@/types/product'
 
 function greetingName(username: string | undefined): string {
@@ -28,9 +29,9 @@ export default function Dashboard() {
   const load = useCallback((isActive: () => boolean = () => true) => {
     setLoading(true)
     setError(null)
-    productApi
-      .getProducts({ page: 1, limit: 5 })
-      .then((data) => {
+    fetchOnce('dashboard-featured-products', () =>
+      productApi.getProducts({ page: 1, limit: 5 }),
+    ).then((data) => {
         if (!isActive()) return
         const items = data?.items
         setProducts(Array.isArray(items) ? items : [])

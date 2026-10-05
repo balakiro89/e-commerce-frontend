@@ -1,4 +1,5 @@
 import api from '@/api/axios'
+import { normalizeProductFromApi } from '@/lib/product-images'
 import type { PaginatedProducts, Product, ProductQueryParams } from '@/types/product'
 
 function normalizePaginated(raw: unknown, params: ProductQueryParams): PaginatedProducts {
@@ -15,7 +16,9 @@ function normalizePaginated(raw: unknown, params: ProductQueryParams): Paginated
     nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : data
 
   const itemsRaw = source.items ?? source.products ?? source.results
-  const items = Array.isArray(itemsRaw) ? (itemsRaw as Product[]) : []
+  const items = Array.isArray(itemsRaw)
+    ? (itemsRaw as Product[]).map((item) => normalizeProductFromApi(item))
+    : []
 
   const total = typeof source.total === 'number' ? source.total : items.length
   const total_pages =
@@ -40,6 +43,6 @@ export const productApi = {
 
   getProductById: async (id: string): Promise<Product> => {
     const response = await api.get<Product>(`/products/${id}`)
-    return response.data
+    return normalizeProductFromApi(response.data)
   },
 }

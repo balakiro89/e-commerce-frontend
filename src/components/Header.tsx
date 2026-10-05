@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { signOut } from '@/lib/auth-session'
+import { isSellerUser } from '@/lib/user-type'
 import { useAuthStore } from '@/store/auth.store'
 import { selectCartItemCount } from '@/store/cart.selectors'
 import { useCartStore } from '@/store/cart.store'
@@ -37,7 +38,9 @@ const NAV_ITEMS = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const showCart = !isSellerUser(user)
   const cartCount = useCartStore(selectCartItemCount)
 
   const handleLogout = () => {
@@ -58,22 +61,24 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/cart" className="relative">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span className="sr-only">Cart</span>
-                  {cartCount > 0 ? (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
-                      {cartCount}
-                    </span>
-                  ) : null}
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Cart</TooltipContent>
-          </Tooltip>
+          {showCart ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/cart" className="relative">
+                    <ShoppingCart className="h-4 w-4" />
+                    <span className="sr-only">Cart</span>
+                    {cartCount > 0 ? (
+                      <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                        {cartCount}
+                      </span>
+                    ) : null}
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Cart</TooltipContent>
+            </Tooltip>
+          ) : null}
 
           {isAuthenticated ? <UserAccountMenu /> : null}
 
@@ -98,13 +103,15 @@ export function Header() {
                     {item.label}
                   </Link>
                 ))}
-                <Link
-                  to="/cart"
-                  className="text-base font-medium text-foreground"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Cart{cartCount > 0 ? ` (${cartCount})` : ''}
-                </Link>
+                {showCart ? (
+                  <Link
+                    to="/cart"
+                    className="text-base font-medium text-foreground"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Cart{cartCount > 0 ? ` (${cartCount})` : ''}
+                  </Link>
+                ) : null}
                 {isAuthenticated ? (
                   <Button variant="outline" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { API_BASE_URL } from '@/lib/api-config'
+import { isCartEnabledForCurrentUser } from '@/lib/cart-access'
 import { useAuthStore } from '@/store/auth.store'
 
 const api = axios.create({
@@ -10,6 +11,11 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  const url = typeof config.url === 'string' ? config.url : ''
+  if (url.includes('/cart') && !isCartEnabledForCurrentUser()) {
+    return Promise.reject(new axios.CanceledError('Cart API is not available for seller accounts'))
+  }
+
   const { token } = useAuthStore.getState()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

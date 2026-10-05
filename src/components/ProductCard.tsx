@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/tooltip'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { OptimizedImage } from '@/components/OptimizedImage'
+import { productPrimaryImageUrl } from '@/lib/product-images'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types/product'
+import { isSellerUser } from '@/lib/user-type'
+import { useAuthStore } from '@/store/auth.store'
 import { useCartStore } from '@/store/cart.store'
 import { useActionLoading } from '@/hooks/use-action-loading'
 
@@ -20,6 +23,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
+  const thumbnail = productPrimaryImageUrl(product.image_urls, product.image_url)
+  const user = useAuthStore((s) => s.user)
+  const showCartActions = !isSellerUser(user)
   const addItem = useCartStore((s) => s.addItem)
   const { loading, run } = useActionLoading()
   const inStock = product.stock > 0
@@ -34,7 +40,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
     <Card className="flex flex-col overflow-hidden pt-0 [content-visibility:auto] [contain-intrinsic-size:320px]">
       <Link to={`/products/${product.id}`} className="block aspect-[4/3] overflow-hidden bg-muted">
         <OptimizedImage
-          src={product.image_url}
+          src={thumbnail}
           alt={product.name}
           className="object-cover"
           wrapperClassName="aspect-[4/3] h-full w-full"
@@ -58,22 +64,24 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
         </p>
       </CardContent>
       <CardFooter className="gap-2 pb-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <LoadingButton
-              type="button"
-              size="icon"
-              className="shrink-0"
-              disabled={!inStock}
-              loading={loading}
-              aria-label="Add to cart"
-              onClick={handleAdd}
-            >
-              <ShoppingBag className="h-4 w-4" />
-            </LoadingButton>
-          </TooltipTrigger>
-          <TooltipContent>Add to cart</TooltipContent>
-        </Tooltip>
+        {showCartActions ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <LoadingButton
+                type="button"
+                size="icon"
+                className="shrink-0"
+                disabled={!inStock}
+                loading={loading}
+                aria-label="Add to cart"
+                onClick={handleAdd}
+              >
+                <ShoppingBag className="h-4 w-4" />
+              </LoadingButton>
+            </TooltipTrigger>
+            <TooltipContent>Add to cart</TooltipContent>
+          </Tooltip>
+        ) : null}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" size="icon" className="shrink-0" asChild>

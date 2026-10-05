@@ -13,6 +13,7 @@ import { LoadingState } from '@/components/LoadingState'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import type { PaginatedProducts } from '@/types/product'
 
 const PAGE_SIZE = 20
@@ -53,14 +54,15 @@ export default function Products() {
     (isActive: () => boolean = () => true) => {
       setLoading(true)
       setError(null)
-      productApi
-        .getProducts({
+      const cacheKey = `products:${page}:${search}:${filters.sort}`
+      fetchOnce(cacheKey, () =>
+        productApi.getProducts({
           page,
           limit: PAGE_SIZE,
           search: search || undefined,
           sort: filters.sort,
-        })
-        .then((result) => {
+        }),
+      ).then((result) => {
           if (isActive()) setData(result)
         })
         .catch(() => {

@@ -9,28 +9,28 @@ import { LoadingState } from '@/components/LoadingState'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
-import { LoadingButton } from '@/components/ui/loading-button'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { PRODUCT_TYPE_LABELS } from '@/types/product'
+import { productPrimaryImageUrl } from '@/lib/product-images'
 import { formatPrice } from '@/lib/utils'
 import type { SellerProduct } from '@/types/seller'
-import { useActionLoading } from '@/hooks/use-action-loading'
+import { PageBlurOverlay } from '@/components/PageBlurOverlay'
+import { fetchOnce } from '@/lib/fetch-once'
 
 export default function SellerProducts() {
   const [products, setProducts] = useState<SellerProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { loading: deleting, run: runDelete } = useActionLoading()
+  const [deleting, setDeleting] = useState(false)
 
   const load = useCallback((isActive: () => boolean = () => true) => {
     setLoading(true)
     setError(null)
-    sellerApi
-      .getProducts()
+    fetchOnce('seller-products', () => sellerApi.getProducts())
       .then((result) => {
         if (isActive()) setProducts(result)
       })
@@ -50,14 +50,17 @@ export default function SellerProducts() {
 
   const handleDelete = (id: string, name: string) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return
-    void runDelete(async () => {
-      await sellerApi.deleteProduct(id)
-      setProducts((prev) => prev.filter((p) => p.id !== id))
-    })
+    setDeleting(true)
+    sellerApi
+      .deleteProduct(id)
+      .then(() => setProducts((prev) => prev.filter((p) => p.id !== id)))
+      .catch(() => setError('Could not delete product. Please try again.'))
+      .finally(() => setDeleting(false))
   }
 
   return (
     <div className="space-y-6">
+      {deleting ? <PageBlurOverlay message="Deleting product…" /> : null}
       <PageBackLink to="/seller/dashboard" label="Back to dashboard" />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -99,7 +102,7 @@ export default function SellerProducts() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <OptimizedImage
-                        src={product.image_url}
+                        src={productPrimaryImageUrl(product.image_urls, product.image_url)}
                         alt=""
                         wrapperClassName="h-12 w-12 shrink-0 rounded-md"
                         className="object-cover"
@@ -149,17 +152,17 @@ export default function SellerProducts() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <LoadingButton
+                          <Button
                             type="button"
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
-                            loading={deleting}
+                            disabled={deleting}
                             aria-label={`Delete ${product.name}`}
                             onClick={() => handleDelete(product.id, product.name)}
                           >
                             <Trash2 className="h-4 w-4" />
-                          </LoadingButton>
+                          </Button>
                         </TooltipTrigger>
                         <TooltipContent>Delete</TooltipContent>
                       </Tooltip>

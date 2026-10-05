@@ -10,6 +10,7 @@ import { PageBackLink } from '@/components/PageBackLink'
 import { LoadingState } from '@/components/LoadingState'
 import { profileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -31,8 +32,7 @@ export default function Profile() {
 
   useEffect(() => {
     const guard = createEffectGuard()
-    authApi
-      .getProfile()
+    fetchOnce('auth-profile', () => authApi.getProfile())
       .then((profile) => {
         if (!guard.isActive()) return
         reset({

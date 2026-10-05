@@ -6,14 +6,16 @@ import { X } from 'lucide-react'
 import { sellerApi } from '@/api/seller.api'
 import { createEffectGuard } from '@/lib/effect-guard'
 import { getApiErrorMessage } from '@/lib/api-error'
+import { PageBlurOverlay } from '@/components/PageBlurOverlay'
 import { PageBackLink } from '@/components/PageBackLink'
+import { fetchOnce } from '@/lib/fetch-once'
 import { LoadingState } from '@/components/LoadingState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RequiredLabel } from '@/components/RequiredLabel'
-import { OptimizedImage } from '@/components/OptimizedImage'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { cn } from '@/lib/utils'
 import {
   MAX_PRODUCT_PHOTOS,
   sellerProductFormSchema,
@@ -79,8 +81,7 @@ export default function SellerProductForm() {
     if (!id) return
     const guard = createEffectGuard()
     setLoadingProduct(true)
-    sellerApi
-      .getProductById(id)
+    fetchOnce(`seller-product-${id}`, () => sellerApi.getProductById(id))
       .then((product) => {
         if (!guard.isActive()) return
         reset({
@@ -104,11 +105,31 @@ export default function SellerProductForm() {
     return () => guard.cancel()
   }, [id, reset])
 
+  const photoSlotsRemaining =
+    MAX_PRODUCT_PHOTOS - existingImages.length - photoFiles.length
+
   const onPhotosChange = (fileList: FileList | null) => {
     if (!fileList?.length) return
+    setMediaError(null)
+    const picked = Array.from(fileList).filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name))
+    if (picked.length === 0) {
+      setMediaError('Please choose image files (JPEG, PNG, WebP, etc.).')
+      if (photoInputRef.current) photoInputRef.current.value = ''
+      return
+    }
+
     setPhotoFiles((prev) => {
-      const merged = [...prev, ...Array.from(fileList)]
-      return merged.slice(0, MAX_PRODUCT_PHOTOS)
+      const room = MAX_PRODUCT_PHOTOS - existingImages.length - prev.length
+      if (room <= 0) return prev
+      const accepted = picked.slice(0, room)
+      if (picked.length > room) {
+        queueMicrotask(() =>
+          setMediaError(
+            `Only ${room} more photo${room === 1 ? '' : 's'} can be added (max ${MAX_PRODUCT_PHOTOS} total).`,
+          ),
+        )
+      }
+      return [...prev, ...accepted]
     })
     if (photoInputRef.current) photoInputRef.current.value = ''
   }
@@ -126,6 +147,10 @@ export default function SellerProductForm() {
     const validation = validateProductMedia(photoFiles, videoFile)
     if (validation) {
       setMediaError(validation)
+      return
+    }
+    if (existingImages.length + photoFiles.length > MAX_PRODUCT_PHOTOS) {
+      setMediaError(`You can only have ${MAX_PRODUCT_PHOTOS} photos per product.`)
       return
     }
     if (!isEdit && photoFiles.length === 0 && existingImages.length === 0) {
@@ -182,7 +207,7 @@ export default function SellerProductForm() {
   }
 
   const totalPhotos = photoPreviews.length + existingImages.length
-  const hasPhotoPreview = totalPhotos > 0
+  const canAddMorePhotos = totalPhotos < MAX_PRODUCT_PHOTOS
 
   const submitLabel =
     submitPhase === 'uploading'
@@ -193,8 +218,11 @@ export default function SellerProductForm() {
           ? 'Update product'
           : 'Create product'
 
+  const showPageOverlay = submitPhase !== 'idle'
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      {showPageOverlay ? <PageBlurOverlay message={submitLabel} /> : null}
       <PageBackLink to="/seller/products" label="Back to products" />
       <div>
         <h1 className="font-serif text-3xl">{isEdit ? 'Update product' : 'Create product'}</h1>
@@ -263,82 +291,126 @@ export default function SellerProductForm() {
         </div>
 
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <RequiredLabel htmlFor="photos">
-              Photos ({totalPhotos}/{MAX_PRODUCT_PHOTOS})
-            </RequiredLabel>
-            {totalPhotos < MAX_PRODUCT_PHOTOS ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => photoInputRef.current?.click()}
-              >
-                Add photos
-              </Button>
-            ) : null}
-          </div>
+          <RequiredLabel htmlFor="photos">
+            Photos ({totalPhotos}/{MAX_PRODUCT_PHOTOS})
+          </RequiredLabel>
+
           <input
             ref={photoInputRef}
             id="photos"
             type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*"
+            multiple={photoSlotsRemaining > 1}
+            className="sr-only"
             onChange={(e) => onPhotosChange(e.target.files)}
           />
-          {hasPhotoPreview ? (
-            <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
+
+          {canAddMorePhotos ? (
+            <button
+              type="button"
+              className={cn(
+                'flex w-full min-h-[120px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border/80',
+                'bg-muted/20 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted/35',
+                'touch-manipulation active:scale-[0.99]',
+              )}
+              onClick={() => photoInputRef.current?.click()}
+            >
+              <span className="text-sm font-medium text-foreground">
+                {totalPhotos === 0 ? 'Tap to choose photos' : 'Add more photos'}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Up to {photoSlotsRemaining} more · 10 MB each · JPG, PNG, WebP
+              </span>
+            </button>
+          ) : (
+            <p className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+              Maximum {MAX_PRODUCT_PHOTOS} photos selected. Remove one to add another.
+            </p>
+          )}
+
+          {totalPhotos > 0 || videoPreview || existingVideo ? (
+            <div className="space-y-3 rounded-lg border border-border/60 bg-card p-3 sm:p-4">
               <p className="text-xs font-medium text-muted-foreground">
-                Selected photos (not uploaded until you save)
+                Review media before saving (photos and video upload to Cloudflare when you submit)
               </p>
-              <div className="flex flex-wrap gap-3">
-                {photoPreviews.map((url, index) => (
-                  <div key={`new-${url}`} className="relative">
-                    <OptimizedImage
-                      src={url}
-                      alt={`Selected photo ${index + 1}`}
-                      wrapperClassName="h-24 w-24 rounded-lg border border-border shadow-sm"
-                      className="object-cover"
-                      priority
-                    />
-                    <button
-                      type="button"
-                      className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow"
-                      aria-label={`Remove photo ${index + 1}`}
-                      onClick={() => removeNewPhoto(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+              {totalPhotos > 0 ? (
+              <ul className="grid grid-cols-3 gap-2 sm:gap-3">
                 {existingImages.map((url, index) => (
-                  <div key={`existing-${index}-${url.slice(0, 24)}`} className="relative">
-                    <OptimizedImage
+                  <li
+                    key={`existing-${index}-${url.slice(0, 32)}`}
+                    className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted shadow-sm"
+                  >
+                    <img
                       src={url}
                       alt={`Saved photo ${index + 1}`}
-                      wrapperClassName="h-24 w-24 rounded-lg border border-border shadow-sm"
-                      className="object-cover"
+                      className="h-full w-full object-cover"
+                      decoding="async"
                     />
                     {isEdit ? (
                       <button
                         type="button"
-                        className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow"
+                        className="absolute right-1 top-1 rounded-full bg-destructive p-1.5 text-destructive-foreground shadow touch-manipulation"
                         aria-label={`Remove saved photo ${index + 1}`}
                         onClick={() => removeExistingPhoto(index)}
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     ) : null}
-                  </div>
+                    <span className="pointer-events-none absolute bottom-1 left-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      {index + 1}
+                    </span>
+                  </li>
                 ))}
-              </div>
+                {photoPreviews.map((url, index) => {
+                  const displayIndex = existingImages.length + index + 1
+                  const file = photoFiles[index]
+                  return (
+                    <li
+                      key={`new-${file?.name ?? 'file'}-${file?.size ?? index}-${file?.lastModified ?? index}`}
+                      className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted shadow-sm"
+                    >
+                      <img
+                        src={url}
+                        alt={`Selected photo ${displayIndex}`}
+                        className="h-full w-full object-cover"
+                        decoding="async"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-1 top-1 rounded-full bg-destructive p-1.5 text-destructive-foreground shadow touch-manipulation"
+                        aria-label={`Remove photo ${displayIndex}`}
+                        onClick={() => removeNewPhoto(index)}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="pointer-events-none absolute bottom-1 left-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        {displayIndex}
+                      </span>
+                    </li>
+                  )
+                })}
+                {Array.from({ length: Math.max(0, MAX_PRODUCT_PHOTOS - totalPhotos) }).map((_, i) => (
+                  <li
+                    key={`empty-slot-${i}`}
+                    className="aspect-square rounded-lg border border-dashed border-border/50 bg-muted/15"
+                    aria-hidden
+                  />
+                ))}
+              </ul>
+              ) : null}
+              {videoPreview || existingVideo ? (
+                <div className="space-y-1 border-t border-border/60 pt-3">
+                  <p className="text-xs font-medium text-muted-foreground">Video preview</p>
+                  <video
+                    src={videoPreview ?? existingVideo}
+                    controls
+                    playsInline
+                    className="max-h-56 w-full rounded-lg border border-border bg-black/5 object-contain"
+                  />
+                </div>
+              ) : null}
             </div>
-          ) : (
-            <Button type="button" variant="outline" onClick={() => photoInputRef.current?.click()}>
-              Choose photos
-            </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="space-y-3">
@@ -351,20 +423,6 @@ export default function SellerProductForm() {
             accept="video/*"
             onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
           />
-          {videoPreview ? (
-            <video
-              src={videoPreview}
-              controls
-              className="max-h-48 w-full rounded-lg border border-border bg-black/5"
-            />
-          ) : null}
-          {!videoPreview && existingVideo ? (
-            <video
-              src={existingVideo}
-              controls
-              className="max-h-48 w-full rounded-lg border border-border bg-black/5"
-            />
-          ) : null}
         </div>
 
         <div className="flex gap-3 pt-2">

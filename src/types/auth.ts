@@ -15,6 +15,10 @@ export interface AuthResponse {
   access_token: string
 }
 
+export interface RegisterResponse {
+  user: User
+}
+
 export interface EmailCheckResponse {
   exists: boolean
 }

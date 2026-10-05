@@ -11,19 +11,17 @@ import { Input } from '@/components/ui/input'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { registerSchema, type RegisterFormValues } from '@/schemas/auth.schema'
-import { homePathForUser, normalizeUser } from '@/lib/user-type'
-import { useAuthStore } from '@/store/auth.store'
 import { cn } from '@/lib/utils'
 
 const inputClass =
   'h-11 rounded-lg border-border/80 bg-muted/30 transition-all duration-200 focus:bg-background focus:shadow-sm'
 
+const fieldClass = 'space-y-2.5'
+
 export default function Register() {
   const navigate = useNavigate()
-  const login = useAuthStore((s) => s.login)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     register,
@@ -36,15 +34,13 @@ export default function Register() {
   const onSubmit = async (values: RegisterFormValues) => {
     setError(null)
     try {
-      const data = await authApi.register({
+      await authApi.register({
         username: values.username,
         email: values.email,
         mobile: values.mobile,
         password: values.password,
       })
-      const user = normalizeUser(data.user)
-      login(user, data.access_token)
-      navigate(homePathForUser(user), { replace: true })
+      navigate('/login', { replace: true, state: { registered: true } })
     } catch (err) {
       setError(getApiErrorMessage(err, 'Could not create account. Please check your details and try again.'))
     }
@@ -60,7 +56,7 @@ export default function Register() {
       {error ? <ErrorMessage message={error} /> : null}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        <div className="space-y-2">
+        <div className={fieldClass}>
           <RequiredLabel htmlFor="username" className="font-semibold text-foreground">
             Username
           </RequiredLabel>
@@ -78,7 +74,7 @@ export default function Register() {
             <p className="text-sm text-destructive">{errors.username.message}</p>
           ) : null}
         </div>
-        <div className="space-y-2">
+        <div className={fieldClass}>
           <RequiredLabel htmlFor="email" className="font-semibold text-foreground">
             Email
           </RequiredLabel>
@@ -97,7 +93,7 @@ export default function Register() {
             <p className="text-sm text-destructive">{errors.email.message}</p>
           ) : null}
         </div>
-        <div className="space-y-2">
+        <div className={fieldClass}>
           <RequiredLabel htmlFor="mobile" className="font-semibold text-foreground">
             Mobile number
           </RequiredLabel>
@@ -116,7 +112,7 @@ export default function Register() {
             <p className="text-sm text-destructive">{errors.mobile.message}</p>
           ) : null}
         </div>
-        <div className="space-y-2">
+        <div className={fieldClass}>
           <RequiredLabel htmlFor="password" className="font-semibold text-foreground">
             Password
           </RequiredLabel>
@@ -141,33 +137,6 @@ export default function Register() {
           </div>
           {errors.password ? (
             <p className="text-sm text-destructive">{errors.password.message}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <RequiredLabel htmlFor="confirmPassword" className="font-semibold text-foreground">
-            Confirm password
-          </RequiredLabel>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="Confirm your password"
-              className={cn(inputClass, 'pl-10 pr-10', errors.confirmPassword && 'border-destructive')}
-              {...register('confirmPassword')}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
-              onClick={() => setShowConfirmPassword((v) => !v)}
-              aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-            >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-          {errors.confirmPassword ? (
-            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
           ) : null}
         </div>
         <LoadingButton

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ShoppingBag, Zap } from 'lucide-react'
 import { productApi } from '@/api/product.api'
 import { createEffectGuard } from '@/lib/effect-guard'
+import { fetchOnce } from '@/lib/fetch-once'
 import { QuantitySelector } from '@/components/QuantitySelector'
 import { LoadingState } from '@/components/LoadingState'
 import { ErrorMessage } from '@/components/ErrorMessage'
@@ -14,7 +15,7 @@ import { PRODUCT_TYPE_LABELS, type Product } from '@/types/product'
 import { useAuthStore } from '@/store/auth.store'
 import { useCartStore } from '@/store/cart.store'
 import { useActionLoading } from '@/hooks/use-action-loading'
-import { OptimizedImage } from '@/components/OptimizedImage'
+import { ProductMediaGallery } from '@/components/ProductMediaGallery'
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>()
@@ -34,8 +35,7 @@ export default function ProductDetails() {
     const guard = createEffectGuard()
     setLoading(true)
     setError(null)
-    productApi
-      .getProductById(id)
+    fetchOnce(`product-${id}`, () => productApi.getProductById(id))
       .then((p) => {
         if (!guard.isActive()) return
         setProduct(p)
@@ -74,15 +74,12 @@ export default function ProductDetails() {
       />
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-          <OptimizedImage
-            src={product.image_url}
-            alt={product.name}
-            priority
-            className="aspect-square object-cover"
-            wrapperClassName="w-full"
-          />
-        </div>
+        <ProductMediaGallery
+          productName={product.name}
+          imageUrl={product.image_url}
+          imageUrls={product.image_urls}
+          videoUrl={product.video_url}
+        />
         <div className="space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">

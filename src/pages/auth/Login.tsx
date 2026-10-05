@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Eye, EyeOff, Lock, User } from 'lucide-react'
@@ -17,9 +17,11 @@ import { cn } from '@/lib/utils'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const login = useAuthStore((s) => s.login)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const registered = (location.state as { registered?: boolean } | null)?.registered === true
 
   const {
     register,
@@ -50,6 +52,12 @@ export default function Login() {
         <h1 className="font-serif text-[2rem] font-semibold leading-tight text-primary">Sign in</h1>
         <p className="text-sm text-muted-foreground">Welcome back to {COMPANY_NAME}</p>
       </div>
+
+      {registered ? (
+        <p className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
+          Account created successfully. Sign in with your credentials.
+        </p>
+      ) : null}
 
       {error ? <ErrorMessage message={error} /> : null}
 
