@@ -7,56 +7,10 @@ import { OptimizedImage } from '@/components/OptimizedImage'
 import { PageBackLink } from '@/components/PageBackLink'
 import { createEffectGuard } from '@/lib/effect-guard'
 import { fetchOnce } from '@/lib/fetch-once'
-import { cn, formatDate, formatPrice } from '@/lib/utils'
-import type { Order, OrderStatus } from '@/types/order'
-
-const STATUS_STEPS: OrderStatus[] = [
-  'CONFIRMED',
-  'PROCESSING',
-  'SHIPPED',
-  'DELIVERED',
-]
-
-function OrderProgress({ status }: { status: OrderStatus }) {
-  const activeIndex =
-    status === 'CANCELLED'
-      ? -1
-      : STATUS_STEPS.indexOf(status as (typeof STATUS_STEPS)[number])
-
-  return (
-    <ol
-      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      aria-label="Order progress"
-    >
-      {STATUS_STEPS.map((step, index) => {
-        const completed = activeIndex >= index
-        const current = activeIndex === index
-        return (
-          <li key={step} className="flex flex-1 flex-col items-center gap-2 text-center">
-            <span
-              className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium',
-                completed
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-muted-foreground',
-                current && 'ring-2 ring-ring ring-offset-2',
-              )}
-              aria-current={current ? 'step' : undefined}
-            >
-              {index + 1}
-            </span>
-            <span className="text-xs sm:text-sm">
-              {step.charAt(0) + step.slice(1).toLowerCase()}
-            </span>
-            {index < STATUS_STEPS.length - 1 ? (
-              <span className="hidden h-px flex-1 bg-border sm:block" aria-hidden />
-            ) : null}
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
+import { OrderProgressStepper } from '@/components/OrderProgressStepper'
+import { formatPaymentStatusLabel } from '@/lib/order-format'
+import { formatDate, formatPrice } from '@/lib/utils'
+import type { Order } from '@/types/order'
 
 export default function OrderDetails() {
   const { id } = useParams<{ id: string }>()
@@ -106,12 +60,14 @@ export default function OrderDetails() {
         </div>
       </div>
 
-      <section className="rounded-lg border border-border p-6">
-        <h2 className="font-medium">Order progress</h2>
-        <div className="mt-6">
-          <OrderProgress status={order.order_status} />
-        </div>
-      </section>
+      {order.payment_status === 'PAID' ? (
+        <section className="rounded-lg border border-border p-6">
+          <h2 className="font-medium">Order progress</h2>
+          <div className="mt-8">
+            <OrderProgressStepper orderStatus={order.order_status} />
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-lg border border-border p-6">
@@ -143,7 +99,7 @@ export default function OrderDetails() {
         <div className="space-y-6">
           <div className="rounded-lg border border-border p-6 text-sm">
             <h2 className="font-medium">Payment & status</h2>
-            <p className="mt-2">Payment: {order.payment_status}</p>
+            <p className="mt-2">Payment: {formatPaymentStatusLabel(order.payment_status)}</p>
             <p>Status: {order.order_status}</p>
           </div>
           <div className="rounded-lg border border-border p-6 text-sm">

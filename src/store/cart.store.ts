@@ -7,7 +7,7 @@ export interface CartState {
   cartOwnerId: string | null
   items: CartItem[]
   syncOwner: (userId: string | null) => void
-  resetForLogout: () => void
+  hydrateFromServer: (input: { userId: string; items: CartItem[] }) => void
   addItem: (product: Product, quantity?: number) => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
@@ -22,15 +22,19 @@ export const useCartStore = create<CartState>()(
       cartOwnerId: null,
       items: [],
       syncOwner: (userId) => {
+        if (userId === null) {
+          // Logged out: keep persisted cart so the same user gets it back on login.
+          return
+        }
         const { cartOwnerId } = get()
         if (cartOwnerId === userId) return
-        if (cartOwnerId === null && userId !== null) {
+        if (cartOwnerId === null) {
           set({ cartOwnerId: userId })
           return
         }
         set({ cartOwnerId: userId, items: [] })
       },
-      resetForLogout: () => set({ cartOwnerId: null, items: [] }),
+      hydrateFromServer: ({ userId, items }) => set({ cartOwnerId: userId, items }),
       addItem: (product, quantity = 1) => {
         set((state) => {
           const existing = state.items.find((item) => item.product.id === product.id)

@@ -27,7 +27,6 @@ export const useAuthStore = create<AuthState>()(
         })
       },
       logout: () => {
-        useCartStore.getState().resetForLogout()
         set({
           user: null,
           token: null,

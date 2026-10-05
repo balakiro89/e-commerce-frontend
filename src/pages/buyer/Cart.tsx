@@ -1,10 +1,16 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { CartItem } from '@/components/CartItem'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { LoadingState } from '@/components/LoadingState'
 import { PageBackLink } from '@/components/PageBackLink'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { createEffectGuard } from '@/lib/effect-guard'
+import { clearServerCart, refreshCartFromServer } from '@/lib/cart-actions'
+import { fetchOnce } from '@/lib/fetch-once'
 import {
   Tooltip,
   TooltipContent,
@@ -18,8 +24,40 @@ import { useActionLoading } from '@/hooks/use-action-loading'
 export default function Cart() {
   const items = useCartStore(selectCartItems)
   const subtotal = useCartStore(selectCartSubtotal)
-  const clearCart = useCartStore((s) => s.clearCart)
   const { loading: clearing, run: runClear } = useActionLoading()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const guard = createEffectGuard()
+    setLoading(true)
+    setError(null)
+    fetchOnce('buyer-cart-page', () => refreshCartFromServer())
+      .catch(() => {
+        if (guard.isActive()) setError('Could not load your cart. Please try again.')
+      })
+      .finally(() => {
+        if (guard.isActive()) setLoading(false)
+      })
+    return () => guard.cancel()
+  }, [])
+
+  if (loading) {
+    return <LoadingState message="Loading your cart..." />
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <PageBackLink to="/products" label="Back to products" />
+        <h1 className="font-serif text-3xl">Shopping Cart</h1>
+        <ErrorMessage message={error} />
+        <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+      </div>
+    )
+  }
 
   if (items.length === 0) {
     return (
@@ -56,7 +94,7 @@ export default function Cart() {
                 aria-label="Clear cart"
                 onClick={() => {
                   void runClear(async () => {
-                    clearCart()
+                    await clearServerCart()
                   })
                 }}
               >

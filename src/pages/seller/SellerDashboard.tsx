@@ -9,6 +9,8 @@ import { ErrorMessage } from '@/components/ErrorMessage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { formatPrice } from '@/lib/utils'
+import { SellerPaidOrdersTable } from '@/components/SellerPaidOrdersTable'
+import type { Order } from '@/types/order'
 import type { SellerDashboardStats } from '@/types/seller'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +18,7 @@ const REFRESH_MS = 15000
 
 export default function SellerDashboard() {
   const [stats, setStats] = useState<SellerDashboardStats | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,10 +28,17 @@ export default function SellerDashboard() {
     else setRefreshing(true)
     setError(null)
     try {
-      const data = silent
-        ? await sellerApi.getDashboardStats()
-        : await fetchOnce('seller-dashboard-stats', () => sellerApi.getDashboardStats())
-      if (isActive()) setStats(data)
+      const loadStats = silent
+        ? sellerApi.getDashboardStats()
+        : fetchOnce('seller-dashboard-stats', () => sellerApi.getDashboardStats())
+      const loadOrders = silent
+        ? sellerApi.getOrders()
+        : fetchOnce('seller-dashboard-orders', () => sellerApi.getOrders())
+      const [statsData, ordersData] = await Promise.all([loadStats, loadOrders])
+      if (isActive()) {
+        setStats(statsData)
+        setOrders(ordersData)
+      }
     } catch {
       if (isActive()) setError('Could not load dashboard stats.')
     } finally {
@@ -58,7 +68,7 @@ export default function SellerDashboard() {
       title: "Today's orders",
       value: stats?.todays_orders ?? 0,
       icon: ShoppingBag,
-      hint: 'Orders placed today',
+      hint: 'Paid orders placed today',
     },
     {
       title: "Today's order value",
@@ -121,6 +131,8 @@ export default function SellerDashboard() {
           </Card>
         ))}
       </div>
+
+      <SellerPaidOrdersTable orders={orders} />
 
       <div className="flex flex-wrap gap-3">
         <Button asChild>

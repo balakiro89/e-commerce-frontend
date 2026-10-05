@@ -17,6 +17,7 @@ import { getApiErrorMessage } from '@/lib/api-error'
 import { openRazorpayCheckout } from '@/lib/razorpay'
 import { formatPrice } from '@/lib/utils'
 import type { PaymentInitResponse } from '@/types/order'
+import { clearServerCart } from '@/lib/cart-actions'
 import { useCartStore } from '@/store/cart.store'
 
 async function resolvePaymentInit(
@@ -30,7 +31,6 @@ async function resolvePaymentInit(
 export default function Checkout() {
   const navigate = useNavigate()
   const items = useCartStore((s) => s.items)
-  const clearCart = useCartStore((s) => s.clearCart)
   const [error, setError] = useState<string | null>(null)
   const [validatedTotal, setValidatedTotal] = useState<number | null>(null)
   const displaySubtotal =
@@ -90,7 +90,7 @@ export default function Checkout() {
       const payment = await resolvePaymentInit(order.id, initialPayment)
 
       if (payment.redirect_url) {
-        clearCart()
+        await clearServerCart()
         window.location.href = payment.redirect_url
         return
       }
@@ -115,7 +115,7 @@ export default function Checkout() {
         })
       }
 
-      clearCart()
+      await clearServerCart()
       navigate(`/orders/${order.id}`)
     } catch (err) {
       setError(getApiErrorMessage(err, 'Could not place order. Please try again.'))

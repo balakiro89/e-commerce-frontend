@@ -13,7 +13,7 @@ import { isSellerUser } from '@/lib/user-type'
 import { formatPrice } from '@/lib/utils'
 import { PRODUCT_TYPE_LABELS, type Product } from '@/types/product'
 import { useAuthStore } from '@/store/auth.store'
-import { useCartStore } from '@/store/cart.store'
+import { addProductToCart } from '@/lib/cart-actions'
 import { useActionLoading } from '@/hooks/use-action-loading'
 import { ProductMediaGallery } from '@/components/ProductMediaGallery'
 
@@ -21,7 +21,6 @@ export default function ProductDetails() {
   const { id } = useParams<{ id: string }>()
   const user = useAuthStore((s) => s.user)
   const sellerView = isSellerUser(user)
-  const addItem = useCartStore((s) => s.addItem)
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -115,7 +114,7 @@ export default function ProductDetails() {
                   loadingText="Adding…"
                   onClick={() => {
                     void runAdd(async () => {
-                      addItem(product, quantity)
+                      await addProductToCart(product, quantity)
                     })
                   }}
                 >
@@ -132,7 +131,7 @@ export default function ProductDetails() {
                   loadingText="Redirecting…"
                   onClick={() => {
                     void runBuy(async () => {
-                      addItem(product, quantity)
+                      await addProductToCart(product, quantity)
                       navigate('/checkout')
                     })
                   }}

@@ -15,7 +15,7 @@ import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types/product'
 import { isSellerUser } from '@/lib/user-type'
 import { useAuthStore } from '@/store/auth.store'
-import { useCartStore } from '@/store/cart.store'
+import { addProductToCart } from '@/lib/cart-actions'
 import { useActionLoading } from '@/hooks/use-action-loading'
 
 interface ProductCardProps {
@@ -26,15 +26,14 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   const thumbnail = productPrimaryImageUrl(product.image_urls, product.image_url)
   const user = useAuthStore((s) => s.user)
   const showCartActions = !isSellerUser(user)
-  const addItem = useCartStore((s) => s.addItem)
   const { loading, run } = useActionLoading()
   const inStock = product.stock > 0
 
   const handleAdd = useCallback(() => {
     void run(async () => {
-      addItem(product)
+      await addProductToCart(product)
     })
-  }, [addItem, product, run])
+  }, [product, run])
 
   return (
     <Card className="flex flex-col overflow-hidden pt-0 [content-visibility:auto] [contain-intrinsic-size:320px]">

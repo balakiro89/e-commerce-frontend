@@ -11,7 +11,7 @@ import { OptimizedImage } from '@/components/OptimizedImage'
 import { productPrimaryImageUrl } from '@/lib/product-images'
 import { formatPrice } from '@/lib/utils'
 import type { CartItem as CartItemType } from '@/types/cart'
-import { useCartStore } from '@/store/cart.store'
+import { removeProductFromCart, updateCartLineQuantity } from '@/lib/cart-actions'
 import { useActionLoading } from '@/hooks/use-action-loading'
 
 interface CartItemProps {
@@ -19,8 +19,6 @@ interface CartItemProps {
 }
 
 export const CartItem = memo(function CartItem({ item }: CartItemProps) {
-  const updateQuantity = useCartStore((s) => s.updateQuantity)
-  const removeItem = useCartStore((s) => s.removeItem)
   const { loading: qtyLoading, run: runQty } = useActionLoading()
   const { loading: removeLoading, run: runRemove } = useActionLoading()
   const thumbnail = productPrimaryImageUrl(item.product.image_urls, item.product.image_url)
@@ -30,17 +28,17 @@ export const CartItem = memo(function CartItem({ item }: CartItemProps) {
   const onQuantityChange = useCallback(
     (qty: number) => {
       void runQty(async () => {
-        updateQuantity(productId, qty)
+        await updateCartLineQuantity(productId, qty)
       })
     },
-    [productId, runQty, updateQuantity],
+    [productId, runQty],
   )
 
   const onRemove = useCallback(() => {
     void runRemove(async () => {
-      removeItem(productId)
+      await removeProductFromCart(productId)
     })
-  }, [productId, removeItem, runRemove])
+  }, [productId, runRemove])
 
   return (
     <div className="flex flex-col gap-4 border-b border-border py-4 sm:flex-row sm:items-center">

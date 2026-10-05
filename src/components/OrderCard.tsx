@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { formatPaymentStatusLabel } from '@/lib/order-format'
 import { formatDate, formatPrice } from '@/lib/utils'
 import type { Order } from '@/types/order'
 
@@ -26,7 +27,8 @@ export const OrderCard = memo(function OrderCard({ order }: OrderCardProps) {
           </p>
           <p className="mt-2 text-lg font-semibold">{formatPrice(order.total)}</p>
           <p className="text-sm text-muted-foreground">
-            Payment: {order.payment_status} · Status: {order.order_status}
+            Payment: {formatPaymentStatusLabel(order.payment_status)} · Status:{' '}
+            {order.order_status.charAt(0) + order.order_status.slice(1).toLowerCase()}
           </p>
         </div>
         <Tooltip>
