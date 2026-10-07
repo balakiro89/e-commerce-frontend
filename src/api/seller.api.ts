@@ -1,6 +1,6 @@
 import api from '@/api/axios'
 import { normalizeProductFromApi } from '@/lib/product-images'
-import type { Order, OrderStatus } from '@/types/order'
+import type { Order, UpdateOrderStatusPayload } from '@/types/order'
 import type {
   SellerDashboardStats,
   SellerProduct,
@@ -32,8 +32,8 @@ export const sellerApi = {
     return response.data
   },
 
-  updateOrderStatus: async (orderId: string, order_status: OrderStatus): Promise<Order> => {
-    const response = await api.patch<Order>(`/seller/orders/${orderId}`, { order_status })
+  updateOrderStatus: async (orderId: string, payload: UpdateOrderStatusPayload): Promise<Order> => {
+    const response = await api.patch<Order>(`/seller/orders/${orderId}`, payload)
     return response.data
   },
 

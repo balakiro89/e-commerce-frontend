@@ -9,6 +9,7 @@ import { createEffectGuard } from '@/lib/effect-guard'
 import { fetchOnce } from '@/lib/fetch-once'
 import { OrderProgressStepper } from '@/components/OrderProgressStepper'
 import { formatOrderIdDisplay, formatPaymentStatusLabel } from '@/lib/order-format'
+import { formatFulfillmentStatusLabel } from '@/lib/shipment'
 import { formatDate, formatPrice } from '@/lib/utils'
 import type { Order } from '@/types/order'
 
@@ -100,8 +101,23 @@ export default function OrderDetails() {
           <div className="rounded-lg border border-border p-6 text-sm">
             <h2 className="font-medium">Payment & status</h2>
             <p className="mt-2">Payment: {formatPaymentStatusLabel(order.payment_status)}</p>
-            <p>Status: {order.order_status}</p>
+            <p>Status: {formatFulfillmentStatusLabel(order.order_status)}</p>
           </div>
+          {order.tracking_id && order.shipment_service ? (
+            <div className="rounded-lg border border-border p-6 text-sm">
+              <h2 className="font-medium">Shipping information</h2>
+              <dl className="mt-2 space-y-1 text-muted-foreground">
+                <div>
+                  <dt className="inline font-medium text-foreground">Tracking ID: </dt>
+                  <dd className="inline">{order.tracking_id}</dd>
+                </div>
+                <div>
+                  <dt className="inline font-medium text-foreground">Shipment service: </dt>
+                  <dd className="inline">{order.shipment_service}</dd>
+                </div>
+              </dl>
+            </div>
+          ) : null}
           <div className="rounded-lg border border-border p-6 text-sm">
             <h2 className="font-medium">Shipping address</h2>
             <address className="mt-2 not-italic text-muted-foreground">

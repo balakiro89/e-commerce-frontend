@@ -7,7 +7,8 @@ import { LoadingState } from '@/components/LoadingState'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { SellerPaidOrdersTable } from '@/components/SellerPaidOrdersTable'
-import type { Order, OrderStatus } from '@/types/order'
+import type { SellerFulfillmentStatus, ShipmentService } from '@/lib/shipment'
+import type { Order } from '@/types/order'
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -36,15 +37,22 @@ export default function SellerOrders() {
     return () => guard.cancel()
   }, [load])
 
-  const onStatusChange = async (orderId: string, order_status: OrderStatus) => {
+  const onStatusChange = async (
+    orderId: string,
+    order_status: SellerFulfillmentStatus,
+    shipping?: { tracking_id: string; shipment_service: ShipmentService },
+  ) => {
     setUpdatingId(orderId)
+    setError(null)
     try {
-      await sellerApi.updateOrderStatus(orderId, order_status)
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, order_status } : o)),
-      )
+      const updated = await sellerApi.updateOrderStatus(orderId, {
+        order_status,
+        ...shipping,
+      })
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)))
     } catch {
       setError('Could not update order status.')
+      throw new Error('Order status update failed')
     } finally {
       setUpdatingId(null)
     }
@@ -72,7 +80,7 @@ export default function SellerOrders() {
           orders={orders}
           title="All paid orders"
           updatingOrderId={updatingId}
-          onFulfillmentChange={(id, status) => void onStatusChange(id, status)}
+          onFulfillmentChange={(id, status, shipping) => void onStatusChange(id, status, shipping)}
         />
       ) : null}
     </div>

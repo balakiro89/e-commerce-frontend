@@ -1,4 +1,5 @@
 import type { ProductType } from '@/types/product'
+import type { ShipmentService } from '@/lib/shipment'
 
 export type OrderStatus =
   | 'CONFIRMED'
@@ -40,6 +41,14 @@ export interface Order {
   customer_name: string
   customer_email: string
   customer_phone: string
+  tracking_id?: string
+  shipment_service?: ShipmentService
+}
+
+export interface UpdateOrderStatusPayload {
+  order_status: Extract<OrderStatus, 'CONFIRMED' | 'SHIPPED' | 'DELIVERED'>
+  tracking_id?: string
+  shipment_service?: ShipmentService
 }
 
 export interface CreateOrderPayload {

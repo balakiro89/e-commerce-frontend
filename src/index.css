@@ -48,9 +48,9 @@
   --border: oklch(0.88 0.008 145);
   --input: oklch(0.88 0.008 145);
   --ring: oklch(0.42 0.09 155);
-  --header: oklch(0.32 0.07 155);
-  --header-foreground: oklch(0.98 0.01 145);
-  --header-border: oklch(0.28 0.06 155);
+  --header: oklch(0.92 0.006 145);
+  --header-foreground: oklch(0.22 0.02 145);
+  --header-border: oklch(0.88 0.008 145);
 }
 
 .app-site-header {

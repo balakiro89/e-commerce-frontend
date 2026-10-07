@@ -43,8 +43,8 @@ export function Header() {
 
   return (
     <header className={SITE_HEADER_CLASS}>
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 [&_button]:text-header-foreground [&_button]:hover:bg-header-foreground/10">
-        <BrandLogo to="/dashboard" nameClassName="text-header-foreground" />
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 [&_button]:text-foreground [&_button]:hover:bg-foreground/5">
+        <BrandLogo to="/dashboard" nameClassName="text-foreground" />
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
           {NAV_ITEMS.map((item) => (
