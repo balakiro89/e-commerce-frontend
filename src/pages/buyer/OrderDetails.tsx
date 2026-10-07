@@ -8,7 +8,7 @@ import { PageBackLink } from '@/components/PageBackLink'
 import { createEffectGuard } from '@/lib/effect-guard'
 import { fetchOnce } from '@/lib/fetch-once'
 import { OrderProgressStepper } from '@/components/OrderProgressStepper'
-import { formatPaymentStatusLabel } from '@/lib/order-format'
+import { formatOrderIdDisplay, formatPaymentStatusLabel } from '@/lib/order-format'
 import { formatDate, formatPrice } from '@/lib/utils'
 import type { Order } from '@/types/order'
 
@@ -53,7 +53,7 @@ export default function OrderDetails() {
       <PageBackLink to="/orders" label="Back to orders" variant="outline" />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-3xl">Order #{order.order_number}</h1>
+          <h1 className="font-serif text-3xl">{formatOrderIdDisplay(order.order_number)}</h1>
           <p className="text-sm text-muted-foreground">
             Placed on {formatDate(order.created_at)}
           </p>

@@ -86,14 +86,19 @@ export default function ProductDetails() {
             </p>
             <h1 className="font-serif text-3xl">{product.name}</h1>
             <p className="text-2xl font-semibold">{formatPrice(product.price)}</p>
-          </div>
-          <p className="leading-relaxed text-muted-foreground">{product.description}</p>
-          {sellerView ? (
             <p className="text-sm">
-              <span className="font-medium text-foreground">Quantity: </span>
-              <span className="text-muted-foreground">{product.stock}</span>
+              <span className="font-medium text-foreground">In stock quantity: </span>
+              {inStock ? (
+                <span className="font-medium tabular-nums text-primary">{product.stock}</span>
+              ) : (
+                <span className="font-medium text-destructive">0 (out of stock)</span>
+              )}
             </p>
-          ) : (
+          </div>
+          <div className="max-w-xl overflow-hidden leading-relaxed text-muted-foreground [overflow-wrap:anywhere] line-clamp-[12]">
+            {product.description}
+          </div>
+          {sellerView ? null : (
             <>
               <div className="space-y-3">
                 <p className="text-sm font-medium">Quantity</p>
@@ -142,13 +147,6 @@ export default function ProductDetails() {
               </div>
             </>
           )}
-          <p className="text-sm">
-            {inStock ? (
-              <span className="text-primary">✓ In Stock</span>
-            ) : (
-              <span className="text-destructive">Out of Stock</span>
-            )}
-          </p>
         </div>
       </div>
     </div>

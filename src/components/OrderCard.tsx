@@ -8,8 +8,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { formatPaymentStatusLabel } from '@/lib/order-format'
-import { formatDate, formatPrice } from '@/lib/utils'
+import { formatOrderIdDisplay, formatPaymentStatusLabel } from '@/lib/order-format'
+import { formatDateTime, formatPrice } from '@/lib/utils'
 import type { Order } from '@/types/order'
 
 interface OrderCardProps {
@@ -21,9 +21,9 @@ export const OrderCard = memo(function OrderCard({ order }: OrderCardProps) {
     <Card>
       <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-6">
         <div>
-          <h3 className="font-medium">Order #{order.order_number}</h3>
+          <h3 className="font-medium">{formatOrderIdDisplay(order.order_number)}</h3>
           <p className="text-sm text-muted-foreground">
-            Placed on: {formatDate(order.created_at)}
+            Placed on: {formatDateTime(order.created_at)}
           </p>
           <p className="mt-2 text-lg font-semibold">{formatPrice(order.total)}</p>
           <p className="text-sm text-muted-foreground">

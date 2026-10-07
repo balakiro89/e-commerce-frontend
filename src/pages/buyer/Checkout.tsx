@@ -104,7 +104,7 @@ export default function Checkout() {
           customerName: values.customer_name,
           customerEmail: values.customer_email,
           customerPhone: values.customer_phone,
-          description: `Order ${order.order_number}`,
+          description: `Order ID - ${order.order_number}`,
         })
 
         await paymentApi.verify({

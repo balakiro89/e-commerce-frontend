@@ -11,7 +11,10 @@ export const sellerProductFormSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   short_description: z.string().min(4, 'Short description is required'),
   description: z.string().min(10, 'Description is required'),
-  price: z.coerce.number().positive('Price must be greater than 0'),
+  price: z.coerce
+    .number()
+    .int('Price must be a whole number')
+    .positive('Price must be greater than 0'),
   stock: z.coerce.number().int().min(0, 'Stock cannot be negative'),
   product_type: productTypeEnum,
   is_active: z.boolean(),

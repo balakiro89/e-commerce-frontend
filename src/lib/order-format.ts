@@ -1,5 +1,9 @@
 import type { Order } from '@/types/order'
 
+export function formatOrderIdDisplay(orderNumber: string): string {
+  return `Order ID - ${orderNumber}`
+}
+
 export function formatShippingAddress(order: Order): string {
   const { shipping_address: a } = order
   return [a.address, `${a.city}, ${a.state} ${a.pincode}`, a.country].filter(Boolean).join(', ')

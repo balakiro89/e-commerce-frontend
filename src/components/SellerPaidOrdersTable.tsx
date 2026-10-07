@@ -6,7 +6,7 @@ import {
   formatPaymentStatusLabel,
   formatShippingAddress,
 } from '@/lib/order-format'
-import { formatDate } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 import {
   Select,
   SelectContent,
@@ -66,15 +66,16 @@ export function SellerPaidOrdersTable({
         </Button>
       </div>
       <div className="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm">
-        <table className="w-full min-w-[880px] text-left text-sm">
+        <table className="w-full min-w-[980px] text-left text-sm">
           <thead className="border-b border-border bg-muted/40 text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Order</th>
+              <th className="px-4 py-3 font-medium">Customer name</th>
               <th className="px-4 py-3 font-medium">Product name</th>
               <th className="px-4 py-3 font-medium">Delivery address</th>
               <th className="px-4 py-3 font-medium">Mobile</th>
               <th className="px-4 py-3 font-medium">Payment</th>
-              <th className="px-4 py-3 font-medium">Date</th>
+              <th className="px-4 py-3 font-medium">Date & time</th>
               {onFulfillmentChange ? (
                 <th className="px-4 py-3 font-medium">Fulfillment</th>
               ) : null}
@@ -85,6 +86,7 @@ export function SellerPaidOrdersTable({
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-3 font-medium">{order.order_number}</td>
+                <td className="whitespace-nowrap px-4 py-3">{order.customer_name}</td>
                 <td className="max-w-[200px] px-4 py-3">{formatOrderProductNames(order)}</td>
                 <td className="max-w-[240px] px-4 py-3 text-muted-foreground">
                   {formatShippingAddress(order)}
@@ -92,7 +94,7 @@ export function SellerPaidOrdersTable({
                 <td className="whitespace-nowrap px-4 py-3">{order.customer_phone}</td>
                 <td className="px-4 py-3">{formatPaymentStatusLabel(order.payment_status)}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                  {formatDate(order.created_at)}
+                  {formatDateTime(order.created_at)}
                 </td>
                 {onFulfillmentChange ? (
                   <td className="min-w-[160px] px-4 py-3">
@@ -121,7 +123,7 @@ export function SellerPaidOrdersTable({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => downloadOrderSummary(order)}
+                    onClick={() => void downloadOrderSummary(order)}
                   >
                     <Download className="h-4 w-4" />
                     Download

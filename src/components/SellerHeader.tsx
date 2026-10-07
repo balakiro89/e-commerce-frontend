@@ -12,13 +12,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { signOut } from '@/lib/auth-session'
-import { cn } from '@/lib/utils'
-
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    'text-sm font-medium transition-colors hover:text-primary',
-    isActive ? 'text-primary' : 'text-muted-foreground',
-  )
+import { SITE_HEADER_CLASS, siteHeaderNavLinkClass } from '@/lib/site-header'
 
 export function SellerHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -34,13 +28,13 @@ export function SellerHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <BrandLogo to="/seller/dashboard" />
+    <header className={SITE_HEADER_CLASS}>
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 [&_button]:text-header-foreground [&_button]:hover:bg-header-foreground/10">
+        <BrandLogo to="/seller/dashboard" nameClassName="text-header-foreground" />
 
         <nav className="hidden flex-1 items-center justify-center gap-8 md:flex" aria-label="Seller">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={navLinkClass}>
+            <NavLink key={item.to} to={item.to} className={siteHeaderNavLinkClass}>
               {item.label}
             </NavLink>
           ))}

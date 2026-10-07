@@ -42,21 +42,21 @@ export function ProductMediaGallery({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30">
+      <div className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/30 p-3 sm:min-h-[360px]">
         {showVideo && videoUrl ? (
           <video
             key={videoUrl}
             src={videoUrl}
             controls
             playsInline
-            className="aspect-square w-full bg-black object-contain sm:aspect-[4/3]"
+            className="max-h-[min(70vh,520px)] w-full bg-black object-contain"
           />
         ) : (
           <img
             key={activeSrc}
             src={activeSrc}
             alt={`${productName}${multiple ? ` — image ${safeIndex + 1} of ${images.length}` : ''}`}
-            className="aspect-square w-full object-cover sm:aspect-[4/3]"
+            className="max-h-[min(70vh,520px)] w-full object-contain"
             decoding="async"
           />
         )}

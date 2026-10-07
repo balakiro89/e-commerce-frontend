@@ -21,13 +21,7 @@ import { isSellerUser } from '@/lib/user-type'
 import { useAuthStore } from '@/store/auth.store'
 import { selectCartItemCount } from '@/store/cart.selectors'
 import { useCartStore } from '@/store/cart.store'
-import { cn } from '@/lib/utils'
-
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    'text-sm font-medium transition-colors hover:text-primary',
-    isActive ? 'text-primary' : 'text-muted-foreground',
-  )
+import { SITE_HEADER_CLASS, siteHeaderNavLinkClass } from '@/lib/site-header'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Home' },
@@ -48,13 +42,13 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <BrandLogo to="/dashboard" />
+    <header className={SITE_HEADER_CLASS}>
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 [&_button]:text-header-foreground [&_button]:hover:bg-header-foreground/10">
+        <BrandLogo to="/dashboard" nameClassName="text-header-foreground" />
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
           {NAV_ITEMS.map((item) => (
-            <NavLink key={item.to} to={item.to} className={navLinkClass}>
+            <NavLink key={item.to} to={item.to} className={siteHeaderNavLinkClass}>
               {item.label}
             </NavLink>
           ))}

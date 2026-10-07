@@ -37,12 +37,15 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
 
   return (
     <Card className="flex flex-col overflow-hidden pt-0 [content-visibility:auto] [contain-intrinsic-size:320px]">
-      <Link to={`/products/${product.id}`} className="block aspect-[4/3] overflow-hidden bg-muted">
+      <Link
+        to={`/products/${product.id}`}
+        className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted p-2"
+      >
         <OptimizedImage
           src={thumbnail}
           alt={product.name}
-          className="object-cover"
-          wrapperClassName="aspect-[4/3] h-full w-full"
+          className="max-h-full max-w-full object-contain"
+          wrapperClassName="flex h-full w-full items-center justify-center"
         />
       </Link>
       <CardContent className="flex flex-1 flex-col gap-3 pt-4">
@@ -59,7 +62,14 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
         </div>
         <p className="text-lg font-semibold text-foreground">{formatPrice(product.price)}</p>
         <p className="text-xs text-muted-foreground">
-          {inStock ? 'In stock' : 'Out of stock'}
+          {inStock ? (
+            <>
+              In stock quantity:{' '}
+              <span className="font-medium tabular-nums text-foreground">{product.stock}</span>
+            </>
+          ) : (
+            <span className="text-destructive">Out of stock</span>
+          )}
         </p>
       </CardContent>
       <CardFooter className="gap-2 pb-4">

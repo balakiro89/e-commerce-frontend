@@ -88,7 +88,7 @@ export default function SellerProductForm() {
           name: product.name,
           short_description: product.short_description,
           description: product.description,
-          price: product.price,
+          price: Math.round(product.price),
           stock: product.stock,
           product_type: product.product_type,
           is_active: product.is_active,
@@ -267,7 +267,7 @@ export default function SellerProductForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <RequiredLabel htmlFor="price">Price (₹)</RequiredLabel>
-            <Input id="price" type="number" step="0.01" {...register('price')} />
+            <Input id="price" type="number" step="1" min="1" {...register('price')} />
             {errors.price ? <p className="text-sm text-destructive">{errors.price.message}</p> : null}
           </div>
           <div className="space-y-2">
