@@ -29,6 +29,8 @@ interface SellerPaidOrdersTableProps {
   orders: Order[]
   title?: string
   description?: string
+  /** Page listing: table only (matches seller product list styling). */
+  layout?: 'default' | 'page'
   updatingOrderId?: string | null
   onFulfillmentChange?: (
     orderId: string,
@@ -41,17 +43,23 @@ export function SellerPaidOrdersTable({
   orders,
   title = 'Paid orders',
   description = 'Orders with successful payment only.',
+  layout = 'default',
   updatingOrderId = null,
   onFulfillmentChange,
 }: SellerPaidOrdersTableProps) {
   const [shipDialogOrder, setShipDialogOrder] = useState<Order | null>(null)
+  const isPageLayout = layout === 'page'
 
-  if (orders.length === 0) {
+  if (orders.length === 0 && !isPageLayout) {
     return (
       <div className="rounded-xl border border-border/60 bg-card p-6 text-sm text-muted-foreground">
         No paid orders yet.
       </div>
     )
+  }
+
+  if (orders.length === 0 && isPageLayout) {
+    return null
   }
 
   const handleStatusSelect = (order: Order, value: SellerFulfillmentStatus) => {
@@ -80,25 +88,14 @@ export function SellerPaidOrdersTable({
     }
   }
 
-  return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="font-serif text-xl font-semibold">{title}</h2>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="rounded-full"
-          onClick={() => downloadOrdersCsv(orders)}
-        >
-          <Download className="h-4 w-4" />
-          Download all (CSV)
-        </Button>
-      </div>
-      <div className="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm">
+  const table = (
+    <div
+      className={
+        isPageLayout
+          ? 'overflow-x-auto rounded-xl border border-border/60'
+          : 'overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm'
+      }
+    >
         <table className="w-full min-w-[980px] text-left text-sm">
           <thead className="border-b border-border bg-muted/40 text-muted-foreground">
             <tr>
@@ -183,7 +180,34 @@ export function SellerPaidOrdersTable({
             })}
           </tbody>
         </table>
-      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {isPageLayout ? (
+        table
+      ) : (
+        <section className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-semibold">{title}</h2>
+              <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={() => downloadOrdersCsv(orders)}
+            >
+              <Download className="h-4 w-4" />
+              Download all (CSV)
+            </Button>
+          </div>
+          {table}
+        </section>
+      )}
 
       <ShipOrderDialog
         order={shipDialogOrder}
@@ -194,6 +218,6 @@ export function SellerPaidOrdersTable({
         onConfirm={confirmShip}
         submitting={shipDialogOrder !== null && updatingOrderId === shipDialogOrder.id}
       />
-    </section>
+    </>
   )
 }

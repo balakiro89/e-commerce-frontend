@@ -69,24 +69,32 @@ export default function SellerDashboard() {
       value: stats?.todays_orders ?? 0,
       icon: ShoppingBag,
       hint: 'Paid orders placed today',
+      to: '/seller/orders',
+      ariaLabel: "View today's orders",
     },
     {
       title: "Today's order value",
       value: formatPrice(stats?.todays_order_value ?? 0),
       icon: TrendingUp,
       hint: 'Revenue received today',
+      to: '/seller/orders',
+      ariaLabel: 'View orders and revenue',
     },
     {
       title: 'Active products',
       value: stats?.active_products ?? 0,
       icon: Package,
       hint: 'Listed and active',
+      to: '/seller/products',
+      ariaLabel: 'Manage active products',
     },
     {
       title: 'Out-of-stock products',
       value: stats?.out_of_stock_products ?? 0,
       icon: AlertTriangle,
       hint: 'Needs restock',
+      to: '/seller/products',
+      ariaLabel: 'View products to restock',
     },
   ]
 
@@ -118,33 +126,28 @@ export default function SellerDashboard() {
       {error ? <ErrorMessage message={error} onRetry={() => void load()} retryLoading={loading} /> : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(({ title, value, icon: Icon, hint }) => (
-          <Card key={title} className="border-border/60 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-              <Icon className="h-4 w-4 text-primary" aria-hidden />
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold tabular-nums">{value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-            </CardContent>
-          </Card>
+        {cards.map(({ title, value, icon: Icon, hint, to, ariaLabel }) => (
+          <Link
+            key={title}
+            to={to}
+            aria-label={ariaLabel}
+            className="group block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Card className="h-full border-border/60 shadow-sm transition-colors group-hover:border-primary/35 group-hover:bg-accent/25">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+                <Icon className="h-4 w-4 text-primary" aria-hidden />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-semibold tabular-nums">{value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
       <SellerPaidOrdersTable orders={orders} />
-
-      <div className="flex flex-wrap gap-3">
-        <Button asChild>
-          <Link to="/seller/orders">Manage orders</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link to="/seller/products">Manage products</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link to="/seller/products/new">Create product</Link>
-        </Button>
-      </div>
     </div>
   )
 }

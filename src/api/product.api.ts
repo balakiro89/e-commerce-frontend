@@ -35,11 +35,33 @@ function normalizePaginated(raw: unknown, params: ProductQueryParams): Paginated
   }
 }
 
+const CATALOG_FETCH_LIMIT = 100
+
+async function getProductsPage(params: ProductQueryParams): Promise<PaginatedProducts> {
+  const response = await api.get<unknown>('/products', { params })
+  return normalizePaginated(response.data, params)
+}
+
+async function fetchAllProductPages(): Promise<Product[]> {
+  const all: Product[] = []
+  let page = 1
+  let totalPages = 1
+
+  while (page <= totalPages) {
+    const result = await getProductsPage({ page, limit: CATALOG_FETCH_LIMIT })
+    all.push(...result.items)
+    totalPages = result.total_pages
+    page += 1
+  }
+
+  return all
+}
+
 export const productApi = {
-  getProducts: async (params: ProductQueryParams): Promise<PaginatedProducts> => {
-    const response = await api.get<unknown>('/products', { params })
-    return normalizePaginated(response.data, params)
-  },
+  getProducts: getProductsPage,
+
+  /** Loads the full active catalog (paginated API calls only on first load). */
+  getAllProducts: fetchAllProductPages,
 
   getProductById: async (id: string): Promise<Product> => {
     const response = await api.get<Product>(`/products/${id}`)

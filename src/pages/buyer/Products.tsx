@@ -14,14 +14,16 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorMessage } from '@/components/ErrorMessage'
 import { createEffectGuard } from '@/lib/effect-guard'
 import { fetchOnce } from '@/lib/fetch-once'
-import type { PaginatedProducts } from '@/types/product'
+import { DEFAULT_PAGE_SIZE, paginateList } from '@/lib/list-pagination'
+import { applyProductListQuery } from '@/lib/product-list-client'
+import { useClampedPage } from '@/lib/use-clamped-page'
+import type { Product } from '@/types/product'
 
-const PAGE_SIZE = 20
 const SEARCH_DEBOUNCE_MS = 400
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [data, setData] = useState<PaginatedProducts | null>(null)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState(searchParams.get('search') ?? '')
@@ -50,30 +52,20 @@ export default function Products() {
     [setSearchParams],
   )
 
-  const loadProducts = useCallback(
-    (isActive: () => boolean = () => true) => {
-      setLoading(true)
-      setError(null)
-      const cacheKey = `products:${page}:${search}:${filters.sort}`
-      fetchOnce(cacheKey, () =>
-        productApi.getProducts({
-          page,
-          limit: PAGE_SIZE,
-          search: search || undefined,
-          sort: filters.sort,
-        }),
-      ).then((result) => {
-          if (isActive()) setData(result)
-        })
-        .catch(() => {
-          if (isActive()) setError('Something went wrong. Please try again.')
-        })
-        .finally(() => {
-          if (isActive()) setLoading(false)
-        })
-    },
-    [filters, page, search],
-  )
+  const loadProducts = useCallback((isActive: () => boolean = () => true) => {
+    setLoading(true)
+    setError(null)
+    fetchOnce('products:all', () => productApi.getAllProducts())
+      .then((result) => {
+        if (isActive()) setAllProducts(result)
+      })
+      .catch(() => {
+        if (isActive()) setError('Something went wrong. Please try again.')
+      })
+      .finally(() => {
+        if (isActive()) setLoading(false)
+      })
+  }, [])
 
   useEffect(() => {
     const guard = createEffectGuard()
@@ -105,6 +97,23 @@ export default function Products() {
 
     return () => window.clearTimeout(timer)
   }, [searchInput, search, updateParams])
+
+  const filteredProducts = useMemo(
+    () => applyProductListQuery(allProducts, search, filters.sort),
+    [allProducts, search, filters.sort],
+  )
+
+  const paginated = useMemo(
+    () => paginateList(filteredProducts, page, DEFAULT_PAGE_SIZE),
+    [filteredProducts, page],
+  )
+
+  const onPageChange = useCallback(
+    (p: number) => updateParams({ page: String(p) }),
+    [updateParams],
+  )
+
+  useClampedPage(page, paginated.total_pages, onPageChange)
 
   const applySort = useCallback(
     (sort: ProductSort) => {
@@ -159,17 +168,16 @@ export default function Products() {
         {error ? (
           <ErrorMessage message={error} onRetry={() => loadProducts()} retryLoading={loading} />
         ) : null}
-        {!loading && !error && (data?.items?.length ?? 0) === 0 ? (
+        {!loading && !error && paginated.total === 0 ? (
           <EmptyState title="No products found." />
         ) : null}
-        {!loading && !error && data && (data.items?.length ?? 0) > 0 ? (
+        {!loading && !error && paginated.total > 0 ? (
           <>
-            <ProductGrid products={data.items} />
+            <ProductGrid products={paginated.items} />
             <Pagination
-              page={data.page}
-              totalPages={data.total_pages}
-              disabled={loading}
-              onPageChange={(p) => updateParams({ page: String(p) })}
+              page={paginated.page}
+              totalPages={paginated.total_pages}
+              onPageChange={onPageChange}
             />
           </>
         ) : null}

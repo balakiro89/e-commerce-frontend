@@ -25,6 +25,8 @@ export interface Product {
   product_type: ProductType
   stock: number
   is_active: boolean
+  /** ISO timestamp; used for client-side "newest" sort on the catalog. */
+  created_at?: string
 }
 
 export interface PaginatedProducts {
